@@ -31,5 +31,11 @@
       "knowledge-base/11_contratos_api.md",
       "knowledge-base/12_devops_y_despliegue.md"
     ]
+  },
+  "visual_design": {
+    "created_by": "design-system",
+    "mode": "off",
+    "status": "skipped",
+    "path": "design-system/README.md"
   }
 }
