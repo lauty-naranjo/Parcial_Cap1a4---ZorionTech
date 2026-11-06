@@ -4,5 +4,32 @@
   "owner": "active-orchestrator",
   "discovery": {
     "skipped": true
+  },
+  "kb": {
+    "created_by": "kb-creator",
+    "source": "ingest",
+    "discovery": {
+      "problem": "Una libreria de barrio necesita una API para gestionar su catalogo (libros con editorial, genero y autores con rol y orden), sus clientes con perfil de contacto y sus ventas con renglones que copian el precio del libro al momento de la operacion.",
+      "system_type": "web_app (API REST asincronica)",
+      "domain": "retail / libreria (catalogo y ventas)",
+      "scale": "single_tenant",
+      "stack": "Python 3.12 + FastAPI + SQLModel + SQLAlchemy 2.0 async + asyncpg + PostgreSQL 16 + Docker (python:3.12-alpine)",
+      "needs_infra": true
+    },
+    "files": [
+      "knowledge-base/README.md",
+      "knowledge-base/01_vision_y_objetivos.md",
+      "knowledge-base/02_descripcion_general.md",
+      "knowledge-base/03_actores_y_roles.md",
+      "knowledge-base/04_modelo_de_datos.md",
+      "knowledge-base/05_reglas_de_negocio.md",
+      "knowledge-base/06_funcionalidades.md",
+      "knowledge-base/07_flujos_principales.md",
+      "knowledge-base/08_arquitectura_propuesta.md",
+      "knowledge-base/09_decisiones_y_supuestos.md",
+      "knowledge-base/10_preguntas_abiertas.md",
+      "knowledge-base/11_contratos_api.md",
+      "knowledge-base/12_devops_y_despliegue.md"
+    ]
   }
 }
