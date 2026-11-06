@@ -32,6 +32,10 @@
       "knowledge-base/12_devops_y_despliegue.md"
     ]
   },
+  "roadmap": {
+    "created_by": "roadmap-generator",
+    "changes_file": "CHANGES.md"
+  },
   "visual_design": {
     "created_by": "design-system",
     "mode": "off",
