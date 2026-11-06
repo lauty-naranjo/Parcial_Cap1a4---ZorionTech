@@ -1,0 +1,19 @@
+# Entorno y secretos
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Entregables y temporales
+*.zip
+Parcial_Cap1a4_*.zip
+
+# Editores / SO
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
