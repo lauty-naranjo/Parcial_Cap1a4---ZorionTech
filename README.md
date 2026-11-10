@@ -64,8 +64,10 @@ manual.
 .venv\Scripts\python.exe -m pytest -q
 ```
 
-La suite por defecto no necesita PostgreSQL. El test de integración de
-`/health/ready` contra una base real solo corre si `DATABASE_URL` está definida:
+La suite por defecto no necesita PostgreSQL: el test de integración de
+`/health/ready` se salta si `DATABASE_URL` no está definida. Ojo: si tenés un
+`.env` con `DATABASE_URL`, el test también corre en `pytest -q`. Para ejecutarlo
+solo a él:
 
 ```powershell
 $env:DATABASE_URL = "postgresql+asyncpg://usuario:password@127.0.0.1:5432/base"

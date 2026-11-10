@@ -35,7 +35,7 @@
 
 - [x] 6.1 Ejecutar la suite completa con `pytest -q` y confirmar que todos los tests pasan y que los tests de integración opt-in se saltan cuando no hay `DATABASE_URL`. Verificación: salida en verde, sin errores ni avisos de configuración de pytest.
 - [x] 6.2 Reproducir D-05: arrancar `uvicorn app.main:app` en un entorno sin `DATABASE_URL` y confirmar que el proceso termina con error y un mensaje claro que menciona `DATABASE_URL`, sin trazas internas ni credenciales. Verificación: salida del comando capturada para la futura evidencia D-05.
-- [ ] 6.3 Con un PostgreSQL 16 accesible, arrancar la aplicación con un `.env` real y comprobar `GET /health/live` → 200 y `GET /health/ready` → 200; luego detener la base (o usar una URL inválida) y comprobar `GET /health/ready` → 503 con el cuerpo exacto. Verificación: ambas respuestas observadas y registradas manualmente.
+- [x] 6.3 Con un PostgreSQL accesible, arrancar la aplicación con un `.env` real y comprobar `GET /health/live` → 200 y `GET /health/ready` → 200; luego cortar el acceso a la base y comprobar `GET /health/ready` → 503 con el cuerpo exacto. Verificación: 200/503 observados contra PostgreSQL 18 local (proxy TCP cortado en caliente); la corrida contra PostgreSQL 16 del VPS queda para C-09/C-10.
 - [x] 6.4 Revisar el diff completo contra el alcance de C-01: no hay tablas de dominio, ni endpoints fuera de `/health/*`, ni dependencias fuera del stack, ni `float` para dinero, ni credenciales versionadas. Verificación: `git diff --stat` solo toca los archivos listados en el proposal y `git grep -n "redis\|alembic\|float("` no devuelve coincidencias en `app/`.
 
 ## Workflow follow-up

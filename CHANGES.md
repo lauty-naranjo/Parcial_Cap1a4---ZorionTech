@@ -147,7 +147,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
 > C-01 y C-02 son secuenciales. C-02 define el esquema que todos los demás changes referencian; no se paraleliza.
 
 ### [C-01] `proyecto-conexion-lifespan`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado
 - **Scope**: Proyecto FastAPI con estructura obligatoria, configuración por entorno y ciclo de vida completo.
   - Estructura: `app/main.py`, `app/core/config.py`, `app/core/database.py`, `app/modules/health/router.py` y carpetas `app/modules/<módulo>/` con `__init__.py`; `test/`, `scripts/`, `requirements.txt`, `env.example`, `.gitignore`, `README.md` mínimo.
   - `requirements.txt` con `fastapi[standard]`, `sqlmodel>=0.0.24`, `sqlalchemy[asyncio]>=2.0`, `asyncpg>=0.30`, `python-dotenv>=1.0`; nada de Redis, Alembic ni auth.
@@ -166,6 +166,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
   - `knowledge-base/08_arquitectura_propuesta.md` §Estructura de directorios, §Capa de datos, §Variables de entorno
   - `knowledge-base/02_descripcion_general.md` §Stack tecnológico
   - `knowledge-base/12_devops_y_despliegue.md` §Variables de entorno del contenedor
+- **Cierre**: verificado y archivado el 2026-11-09; 38 tests en verde; `/health/live` 200 y `/health/ready` 200/503 verificados contra PostgreSQL real.
 
 ---
 
