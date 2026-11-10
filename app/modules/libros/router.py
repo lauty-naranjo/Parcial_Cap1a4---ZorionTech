@@ -1,13 +1,23 @@
 """Router del módulo libros (C-03): listado, detalle y edición escalar."""
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, status
 
 from app.core.database import SessionDep
 from app.core.pagination import Limit, Offset
 from app.modules.libros import service
-from app.modules.libros.schemas import LibroDetalleRead, LibroRead, LibroUpdate
+from app.modules.libros.schemas import (
+    LibroCreate,
+    LibroDetalleRead,
+    LibroRead,
+    LibroUpdate,
+)
 
 router = APIRouter(prefix="/libros", tags=["Libros"])
+
+
+@router.post("/", response_model=LibroDetalleRead, status_code=status.HTTP_201_CREATED)
+async def crear(datos: LibroCreate, session: SessionDep) -> LibroDetalleRead:
+    return await service.crear(session, datos)
 
 
 @router.get("/", response_model=list[LibroRead])

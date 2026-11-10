@@ -1,10 +1,11 @@
 """DTO de entrada y salida del módulo clientes (C-03)."""
 
-from datetime import datetime
-from decimal import Decimal
-
 from pydantic import Field
 from sqlmodel import SQLModel
+
+# Los DTO de salida de la venta viven en ``ventas/schemas.py`` (C-04); se
+# reexportan acá para no romper C-03 (``GET /clientes/{id}/ventas``).
+from app.modules.ventas.schemas import ClienteResumenRead, RenglonRead, VentaRead  # noqa: F401
 
 # Patrón simple de email (sin dependencia de ``pydantic[email]``); la unicidad
 # la garantiza el UNIQUE de la base (RN-02).
@@ -48,31 +49,3 @@ class ClienteRead(SQLModel):
     nombre: str
     email: str
     perfil: PerfilRead | None = None
-
-
-class ClienteResumenRead(SQLModel):
-    """Cliente resumido embebido en una venta (sin perfil)."""
-
-    id: int
-    nombre: str
-    email: str
-
-
-class RenglonRead(SQLModel):
-    """Renglón de venta: ``titulo`` desde el libro y ``subtotal`` calculado."""
-
-    libro_id: int
-    titulo: str
-    cantidad: int
-    precio_unitario: Decimal
-    subtotal: Decimal
-
-
-class VentaRead(SQLModel):
-    """Contrato de lectura de una venta (se completa en C-06)."""
-
-    id: int
-    fecha: datetime
-    total: Decimal
-    cliente: ClienteResumenRead
-    renglones: list[RenglonRead]

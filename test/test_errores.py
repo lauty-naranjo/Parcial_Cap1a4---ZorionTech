@@ -24,6 +24,9 @@ def test_mapa_de_constraints_con_mensajes_propios():
     assert CONSTRAINT_MENSAJE["uq_cliente_email"] == "El email ya está registrado"
     assert CONSTRAINT_MENSAJE["uq_perfil_cliente_cliente_id"] == "El cliente ya tiene un perfil"
     assert CONSTRAINT_MENSAJE["fk_libro_editorial_id"] == "La editorial indicada no existe"
+    assert (
+        CONSTRAINT_MENSAJE["libro_autor_pkey"] == "El autor ya está asociado a este libro"
+    )
 
 
 @pytest.mark.parametrize(
@@ -36,6 +39,7 @@ def test_mapa_de_constraints_con_mensajes_propios():
         ("uq_editorial_nombre", "El nombre ya está registrado"),
         ("uq_genero_nombre", "El nombre ya está registrado"),
         ("fk_libro_genero_id", "El género indicado no existe"),
+        ("libro_autor_pkey", "El autor ya está asociado a este libro"),
     ],
 )
 def test_traduce_por_nombre_de_constraint(constraint, mensaje):

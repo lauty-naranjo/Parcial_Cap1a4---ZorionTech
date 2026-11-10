@@ -231,7 +231,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
 > C-04 es el change más pesado después de C-02. No dividirlo sin romper la correspondencia 1:1 con el Ejercicio 4.
 
 ### [C-04] `altas-con-relaciones`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado
 - **Scope**: Altas de libro y venta con ids de entidades existentes y datos propios de la relación.
   - `LibroCreate` con `isbn`, `titulo`, `precio`, `stock`, `editorial_id`, `genero_id` opcional y `autores: list[AutorLibroCreate]` (`autor_id`, `rol`, `orden`); `AutorLibroCreate` valida `rol` ∈ cuatro valores y `orden >= 1`.
   - `libros/service.py`: crear `Libro` con los ids tal como llegan, sin `SELECT` previo de editorial/género/autor; crear un `LibroAutor` por elemento y agregarlo a `libro.autorias`; un solo `commit`.
@@ -249,6 +249,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
   - `knowledge-base/11_contratos_api.md` §DTO de entrada, §Ejemplos canónicos
   - `knowledge-base/04_modelo_de_datos.md` §`libro_autor`, §`venta`, §`renglon_venta`
   - `knowledge-base/09_decisiones_y_supuestos.md` §DD-03, DD-04, DD-05
+- **Cierre**: verificado y archivado el 2026-11-10; 186 tests en verde (158 baseline + 28 nuevos); `POST /libros/` y `POST /ventas/` con autorías y renglones anidados verificados contra PostgreSQL real; precio copiado y total en `Decimal`; fecha ISO 8601 `Z` (IN-05); sin `SELECT` previo de existencia (una consulta `WHERE id IN (...)`).
 
 ---
 

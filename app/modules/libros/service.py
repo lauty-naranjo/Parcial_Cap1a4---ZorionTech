@@ -10,7 +10,13 @@ from app.core.errors import traducir_integrity_error
 from app.modules.editoriales.schemas import EditorialRead
 from app.modules.generos.schemas import GeneroRead
 from app.modules.libros.models import Libro, LibroAutor
-from app.modules.libros.schemas import LibroAutorRead, LibroDetalleRead, LibroUpdate
+from app.modules.libros.schemas import (
+    AutorLibroCreate,
+    LibroAutorRead,
+    LibroCreate,
+    LibroDetalleRead,
+    LibroUpdate,
+)
 
 MENSAJE_NO_ENCONTRADO = "No encontrado"
 
@@ -85,6 +91,34 @@ async def obtener(session: AsyncSession, libro_id: int) -> LibroDetalleRead:
     if libro is None:
         raise HTTPException(status_code=404, detail=MENSAJE_NO_ENCONTRADO)
     return _a_detalle(libro)
+
+
+async def crear(session: AsyncSession, datos: LibroCreate) -> LibroDetalleRead:
+    """Da de alta un libro con sus autorías en un solo ``commit`` (C-04).
+
+    No consulta la existencia de editorial/género/autor: los ids se asignan tal
+    como llegan y la FK dispara ``IntegrityError`` (DD-05), traducido a 409.
+    """
+    libro = Libro(
+        isbn=datos.isbn,
+        titulo=datos.titulo,
+        precio=datos.precio,
+        stock=datos.stock,
+        editorial_id=datos.editorial_id,
+        genero_id=datos.genero_id,
+        autorias=[
+            LibroAutor(autor_id=a.autor_id, rol=a.rol, orden=a.orden)
+            for a in datos.autores
+        ],
+    )
+    session.add(libro)
+    try:
+        await session.commit()
+    except IntegrityError as exc:
+        await session.rollback()
+        raise traducir_integrity_error(exc) from None
+
+    return await obtener(session, libro.id)
 
 
 async def actualizar(

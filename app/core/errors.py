@@ -23,6 +23,7 @@ CONSTRAINT_MENSAJE: dict[str, str] = {
     "fk_libro_autor_autor_id": "El autor indicado no existe",
     "fk_venta_cliente_id": "El cliente indicado no existe",
     "fk_renglon_venta_libro_id": "El libro indicado no existe",
+    "libro_autor_pkey": "El autor ya está asociado a este libro",
 }
 
 

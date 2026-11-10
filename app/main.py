@@ -14,6 +14,7 @@ from app.modules.editoriales.router import router as editoriales_router
 from app.modules.generos.router import router as generos_router
 from app.modules.health.router import router as health_router
 from app.modules.libros.router import router as libros_router
+from app.modules.ventas.router import router as ventas_router
 
 # C-02 completará estos módulos con las nueve tablas del dominio. Los imports
 # deben ejecutarse antes de `SQLModel.metadata.create_all` para que el esquema
@@ -55,6 +56,7 @@ def create_app() -> FastAPI:
     aplicacion.include_router(autores_router)
     aplicacion.include_router(clientes_router)
     aplicacion.include_router(libros_router)
+    aplicacion.include_router(ventas_router)
     return aplicacion
 
 
