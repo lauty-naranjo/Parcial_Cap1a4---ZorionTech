@@ -1,0 +1,5 @@
+fastapi[standard]
+sqlmodel>=0.0.24
+sqlalchemy[asyncio]>=2.0
+asyncpg>=0.30
+python-dotenv>=1.0
