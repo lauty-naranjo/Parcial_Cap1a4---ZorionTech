@@ -171,7 +171,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
 ---
 
 ### [C-02] `modelos-restricciones-relaciones`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado
 - **Scope**: Las nueve tablas del dominio, con restricciones, índices y navegación bidireccional.
   - `editoriales/models.py`: `Editorial` (`__tablename__ = "editorial"`; `id`, `nombre` UNIQUE NOT NULL, `pais` NOT NULL; `libros` con `back_populates`).
   - `generos/models.py`: `Genero` (`__tablename__ = "genero"`; `nombre` UNIQUE NOT NULL; `libros`).
@@ -192,6 +192,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
   - `knowledge-base/09_decisiones_y_supuestos.md` §DD-01, DD-02, SU-01, SU-02
   - `knowledge-base/08_arquitectura_propuesta.md` §Capa de datos
   - `knowledge-base/07_flujos_principales.md` §Flujo 2 (navegación `libro.autorias[i].autor`)
+- **Cierre**: verificado y archivado el 2026-11-09; 75 tests en verde; 20 constraints con nombre (5 UNIQUE + 7 CHECK + 8 FK) verificados en la base real; composición/cascada verificada contra PostgreSQL.
 
 ---
 
