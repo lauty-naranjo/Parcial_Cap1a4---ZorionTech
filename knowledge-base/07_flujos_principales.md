@@ -132,7 +132,7 @@ Cliente → Router → Pydantic/SQLModel valida → Service → DB
 
 **Pasos**:
 1. `/health/live` responde `{"estado": "vivo"}` sin abrir conexión a la base.
-2. `/health/ready` ejecuta `SELECT 1` con la sesión; 200 si responde.
+2. `/health/ready` ejecuta `SELECT 1` con la sesión: 200 `{"estado": "listo", "base": "ok"}` si responde; 503 `{"estado": "no_listo", "base": "error"}` si no.
 3. `HEALTHCHECK CMD wget -qO- http://127.0.0.1:8000/health/ready || exit 1`.
 4. `docker ps` muestra `healthy`.
 

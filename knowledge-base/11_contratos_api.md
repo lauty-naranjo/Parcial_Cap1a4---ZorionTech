@@ -7,7 +7,7 @@
 | Método | Ruta | Cuerpo | Respuesta | Códigos |
 |---|---|---|---|---|
 | GET | `/health/live` | — | `{"estado": "vivo"}` | 200 |
-| GET | `/health/ready` | — | Estado de la base | 200 |
+| GET | `/health/ready` | — | `{"estado": "listo", "base": "ok"}` (503 si la base no responde) | 200, 503 |
 | POST | `/editoriales/` | `EditorialCreate` | `EditorialRead` | 201, 409, 422 |
 | GET | `/editoriales/` | `limit`, `offset` | Lista de `EditorialRead` | 200, 422 |
 | GET | `/editoriales/{id}` | — | `EditorialRead` | 200, 404, 422 |
@@ -65,7 +65,7 @@
 | `VentaRead` | `id`, `fecha`, `total`, `cliente`, `renglones` |
 | `RenglonRead` | `libro_id`, `titulo`, `cantidad`, `precio_unitario`, `subtotal` |
 
-Los importes se serializan como **string decimal** (`"25000.00"`).
+Los importes se serializan como **string decimal** (`"25000.00"`). La `fecha` se serializa en UTC, ISO 8601 con microsegundos y sufijo `Z` (`"2026-10-08T21:14:11.751581Z"`); si el serializador emite `+00:00`, se normaliza en el DTO de salida.
 
 ## Ejemplos canónicos
 
@@ -121,6 +121,8 @@ Respuesta esperada (201):
 | `offset` | int | ≥ 0 | 0 |
 | `titulo` (solo `/libros/`) | str | búsqueda parcial, `ilike`, parámetro ligado | — |
 | `genero_id` (solo `/libros/`) | int | FK existente; filtro exacto | — |
+
+RN-10 se aplica a **toda** colección: `GET /editoriales/`, `GET /generos/`, `GET /libros/`, `GET /ventas/`, `GET /editoriales/{id}/libros`, `GET /generos/{id}/libros`, `GET /autores/{id}/libros` y `GET /clientes/{id}/ventas` aceptan `limit` y `offset` con default 20/0 y devuelven 422 si están fuera de rango. Que la matriz de la consigna no los muestre en un endpoint no lo exime.
 
 ## Errores y mensajes
 

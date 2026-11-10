@@ -35,7 +35,7 @@ La fuente de verdad del dominio vive en `knowledge-base/`. **Leé el archivo rel
 | [01_vision_y_objetivos.md](knowledge-base/01_vision_y_objetivos.md) | Propósito, 5 actores, alcance de la entrega, fuera de alcance, métricas |
 | [02_descripcion_general.md](knowledge-base/02_descripcion_general.md) | Stack con versiones, arquitectura general, integraciones, resumen de API |
 | [03_actores_y_roles.md](knowledge-base/03_actores_y_roles.md) | Actores, ausencia de RBAC, rutas públicas |
-| [04_modelo_de_datos.md](knowledge-base/04_modelo_de_datos.md) | 8 tablas con columnas obligatorias, ERD, relaciones y justificación del lado de cada FK, índices, seed |
+| [04_modelo_de_datos.md](knowledge-base/04_modelo_de_datos.md) | 9 tablas con columnas obligatorias, ERD, relaciones y justificación del lado de cada FK, índices, seed |
 | [05_reglas_de_negocio.md](knowledge-base/05_reglas_de_negocio.md) | RN-01 a RN-12, reglas de integridad (RI-01…05), reglas globales y matriz regla → caso |
 | [06_funcionalidades.md](knowledge-base/06_funcionalidades.md) | 5 épicas y 20 historias de usuario con criterios de aceptación |
 | [07_flujos_principales.md](knowledge-base/07_flujos_principales.md) | 7 flujos extremo a extremo (arranque, alta de libro, alta de venta, lectura sin N+1, perfil, healthchecks, actualización) |
@@ -45,16 +45,18 @@ La fuente de verdad del dominio vive en `knowledge-base/`. **Leé el archivo rel
 | [11_contratos_api.md](knowledge-base/11_contratos_api.md) | Matriz completa de endpoints, DTOs, ejemplos, errores y casos C/D |
 | [12_devops_y_despliegue.md](knowledge-base/12_devops_y_despliegue.md) | Dockerfile, `.dockerignore`, `docker run`, healthcheck, `DEPLOY.md`, evidencia, checklist de entrega |
 
-### Inconsistencias a resolver ANTES de codear
+### Decisiones cerradas (no reabrir)
 
-`knowledge-base/10_preguntas_abiertas.md` §Inconsistencias / ambigüedades detectadas. Ninguna se resuelve improvisando en el código: se acuerda la decisión y se documenta en el `README.md` o en el artefacto del change que corresponda.
+Las seis inconsistencias de `knowledge-base/10_preguntas_abiertas.md` quedaron **resueltas el 2026-11-09**. No se improvisan en el código ni se reabren sin acuerdo explícito del grupo.
 
-- **IN-01** — ¿`PATCH /libros/{id}` edita la lista de autores? Propuesta: limitarlo a campos escalares y documentarlo.
-- **IN-02** — Código para `genero_id` inexistente. Propuesta: 409, por coherencia con la FK.
-- **IN-03** — Cuerpo exacto de `/health/ready`. Propuesta: decidir uno (`{"estado": "listo", "base": "ok"}`) y mantenerlo.
-- **IN-04** — Cantidad exacta de consultas esperada en C-07. Propuesta: registrar el mismo número con 1 y con 3 autores/renglones en `evidencia/`.
-- **IN-05** — Formato de `fecha`. Propuesta: `DateTime(timezone=True)` en UTC, serializado ISO 8601 con `Z`.
-- **IN-06** — ¿`SQL_ECHO` es obligatoria? Propuesta: `false` por defecto en `config.py`, presente en `env.example`.
+- **IN-01** — `PATCH /libros/{id}` acepta **solo campos escalares**; las autorías no se editan por PATCH.
+- **IN-02** — `genero_id` inexistente → **409**, igual que editorial y autor.
+- **IN-03** — `/health/ready` → 200 `{"estado": "listo", "base": "ok"}`; 503 `{"estado": "no_listo", "base": "error"}`.
+- **IN-04** — Detalle de libro y de venta en un **número fijo** de consultas (referencia: 2); el número va a `evidencia/`. Lo evaluado es que no crezca.
+- **IN-05** — `fecha` en UTC, ISO 8601 con microsegundos y sufijo `Z`; normalizar en el DTO si Pydantic emite `+00:00`.
+- **IN-06** — `SQL_ECHO` opcional con default `false`; presente en `env.example`.
+
+Además: **RN-10 se aplica a toda colección** (todo listado acepta `limit`/`offset`, default 20/0), no solo a los que la matriz de la consigna muestra con paginación.
 
 ---
 

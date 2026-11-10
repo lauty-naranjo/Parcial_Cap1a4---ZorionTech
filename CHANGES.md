@@ -47,6 +47,7 @@
 - La carga perezosa está prohibida: toda relación que se lee se precarga en la misma consulta.
 - En altas, un id inexistente o un UNIQUE repetido se traduce a **409**; el **404** es solo para lecturas y `PATCH` de un recurso que no existe; el contrato inválido es **422**.
 - Ninguna credencial en el código, el repositorio, la imagen ni el `.zip`.
+- Las seis inconsistencias IN-01…IN-06 de `knowledge-base/10_preguntas_abiertas.md` están **resueltas (2026-11-09)**; no se reabren. RN-10 se aplica a **toda colección**: todo listado acepta `limit`/`offset` (default 20/0), aunque la matriz de la consigna no los muestre.
 
 ---
 
@@ -153,7 +154,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
   - `config.py`: `load_dotenv()`; `DATABASE_URL` obligatoria y sin default (si falta, el arranque falla con mensaje claro); `SQL_ECHO` booleano con default `false`.
   - `database.py`: `create_async_engine(settings.database_url, echo=settings.sql_echo)`, `async_sessionmaker(engine, expire_on_commit=False)` y `get_session()` como generador asíncrono con `async with`.
   - `lifespan` en `main.py`: crea motor y fábrica, los guarda en `app.state.engine` y `app.state.session_factory`; importa explícitamente los `models` de todos los módulos antes de `SQLModel.metadata.create_all`; al apagar ejecuta `await engine.dispose()`.
-  - `GET /health/live` → 200 `{"estado": "vivo"}` sin tocar la base; `GET /health/ready` → 200 ejecutando `SELECT 1` (503 con mensaje propio si la base no responde).
+  - `GET /health/live` → 200 `{"estado": "vivo"}` sin tocar la base; `GET /health/ready` → 200 `{"estado": "listo", "base": "ok"}` ejecutando `SELECT 1`, y 503 `{"estado": "no_listo", "base": "error"}` con mensaje propio si la base no responde (IN-03 resuelto; el `HEALTHCHECK` de C-08 depende del código HTTP, no del cuerpo).
   - `env.example` con la forma de `DATABASE_URL` (`postgresql+asyncpg://usuario:password@host:5432/base`) y `SQL_ECHO=false`, sin valores reales; `.gitignore` con `.env`, `.venv`, `__pycache__/`, `*.pyc`.
   - Tests: `/health/live` sin base; `/health/ready` 200 con base y falla controlada sin base; arranque sin `DATABASE_URL` falla (D-05).
   - No crear tablas de dominio acá: C-02 las agrega y las importa en el mismo `lifespan`.
@@ -206,7 +207,8 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
   - Géneros: `POST /generos/` 201/409; `GET /generos/` paginado 200; `GET /generos/{id}/libros` 200/404. No agregar `GET /generos/{id}` ni `PATCH`: no están en la tabla de referencia.
   - Autores: `POST /autores/` 201/422; `GET /autores/{id}` 200/404/422; `PATCH /autores/{id}` 200/404/422; `GET /autores/{id}/libros` 200/404 con `rol` y `orden`.
   - Clientes: `POST /clientes/` 201/409/422; `GET /clientes/{id}` 200/404 con perfil (`joinedload`); `PATCH /clientes/{id}` 200/404/409/422; `POST /clientes/{id}/perfil` 201/404/409; `GET /clientes/{id}/ventas` 200/404.
-  - Libros (lectura y edición): `GET /libros/` con `limit`, `offset`, `titulo` y `genero_id` (200/422; editorial y género con `joinedload`; búsqueda `ilike` con parámetro ligado); `GET /libros/{id}` 200/404 con editorial, género y autores; `PATCH /libros/{id}` 200/404/409/422 con `exclude_unset`, solo campos escalares (documentar IN-01/SU-08).
+  - Libros (lectura y edición): `GET /libros/` con `limit`, `offset`, `titulo` y `genero_id` (200/422; editorial y género con `joinedload`; búsqueda `ilike` con parámetro ligado); `GET /libros/{id}` 200/404 con editorial, género y autores; `PATCH /libros/{id}` 200/404/409/422 con `exclude_unset`, solo campos escalares: las autorías **no** se editan por PATCH (IN-01 resuelto; documentarlo en `README.md`).
+  - Todos los endpoints que devuelven una colección (`GET /editoriales/`, `/generos/`, `/editoriales/{id}/libros`, `/generos/{id}/libros`, `/autores/{id}/libros`, `/libros/` y, en C-06, `/ventas/` y `/clientes/{id}/ventas`) aceptan `limit` y `offset` con los defaults de RN-10 (20/0) y los validan con 422. Que la matriz de la consigna no los liste en un endpoint no lo exime: RN-10 dice "todo listado".
   - `POST /libros/` y `POST /ventas/` no se implementan acá: son C-04. Tampoco hay `DELETE` (SU-05).
   - Errores: `IntegrityError` por UNIQUE/FK → 409 con mensaje propio; recurso inexistente en lectura/PATCH → 404; contrato o query inválidos → 422; nunca `str(exc)`, nombres de constraints ni trazas (RN-12).
   - Tests: C-01 (id no entero → 422), C-02 (ISBN/email repetido → 409), C-03 (segundo perfil → 409), C-08 (`' OR '1'='1` → 200 lista vacía), PATCH parcial y paginación fuera de rango → 422.
@@ -232,7 +234,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
   - `libros/service.py`: crear `Libro` con los ids tal como llegan, sin `SELECT` previo de editorial/género/autor; crear un `LibroAutor` por elemento y agregarlo a `libro.autorias`; un solo `commit`.
   - `POST /libros/` → 201 con el detalle releído (editorial, género y autores) usando precarga; ISBN repetido, editorial/género/autor inexistente o autoría duplicada → 409 con mensaje propio mapeado por constraint (RN-01, RI-01, RI-02, RI-05).
   - `VentaCreate` con `cliente_id` y `renglones: list[RenglonCreate]` (`libro_id`, `cantidad > 0`, `min_length=1`); validador que rechaza `libro_id` repetido → 422 (RN-05); no aceptar `precio_unitario`, `total` ni `fecha` en el cuerpo.
-  - `ventas/service.py`: cargar los libros involucrados en **una** consulta (`WHERE id IN (...)`); si falta un libro → 409 "El libro indicado no existe"; copiar `precio_unitario = libro.precio` (RN-06); calcular `total = sum(cantidad × precio_unitario)` (RN-07); `fecha = datetime.now(timezone.utc)`; agregar los renglones a `venta.renglones` y commitear por composición.
+  - `ventas/service.py`: cargar los libros involucrados en **una** consulta (`WHERE id IN (...)`); si falta un libro → 409 "El libro indicado no existe"; copiar `precio_unitario = libro.precio` (RN-06); calcular `total = sum(cantidad × precio_unitario)` (RN-07); `fecha = datetime.now(timezone.utc)`, serializada en ISO 8601 UTC con microsegundos y sufijo `Z` (`"2026-10-08T21:14:11.751581Z"`, IN-05 resuelto); agregar los renglones a `venta.renglones` y commitear por composición.
   - `POST /ventas/` → 201 con cliente y renglones (incluido `titulo` y `subtotal` calculado en el DTO); cliente inexistente → 409 (RI-03); libro inexistente → 409 (RI-04); nunca 500 por `IntegrityError`.
   - No hay `PATCH`/`PUT`/`DELETE` de ventas (RN-08, DD-03); los renglones no tienen alta por separado (RN-04).
   - Tests: C-04 (editorial/autor inexistente → 409), C-05 (cliente/libro inexistente → 409), C-06 (venta con dos renglones → 201, precios copiados y total 77000.00 con el seed); verificar con `SQL_ECHO` que no hay `SELECT` de existencia antes del alta y que cambiar el precio del libro después no altera la venta.
@@ -278,9 +280,9 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
 ### [C-06] `lecturas-sin-n-plus-uno`
 - **Estado**: `[ ]` pendiente
 - **Scope**: Toda lectura relacional con carga anticipada y número fijo de consultas.
-  - `libros/service.py`: `GET /libros/{id}` con `joinedload(Libro.editorial)`, `joinedload(Libro.genero)` y `selectinload(Libro.autorias).joinedload(LibroAutor.autor)`; tres consultas fijas, independientes de la cantidad de autores.
-  - `ventas/service.py`: `GET /ventas/{id}` con `joinedload(Venta.cliente)` y `selectinload(Venta.renglones).joinedload(RenglonVenta.libro)`; tres consultas fijas, independientes de la cantidad de renglones.
-  - `GET /ventas/` y `GET /clientes/{id}/ventas` con la misma precarga (cliente + renglones + libro) o un DTO de resumen; no disparar consultas por fila.
+  - `libros/service.py`: `GET /libros/{id}` con `joinedload(Libro.editorial)`, `joinedload(Libro.genero)` y `selectinload(Libro.autorias).joinedload(LibroAutor.autor)`; **un número fijo de consultas** (la referencia son 2: una con los `joinedload` y otra con el `selectinload`), independiente de la cantidad de autores.
+  - `ventas/service.py`: `GET /ventas/{id}` con `joinedload(Venta.cliente)` y `selectinload(Venta.renglones).joinedload(RenglonVenta.libro)`; **un número fijo de consultas** (referencia: 2), independiente de la cantidad de renglones.
+  - `GET /ventas/` y `GET /clientes/{id}/ventas` con la misma precarga (cliente + renglones + libro) o un DTO de resumen, **paginados con `limit`/`offset` (RN-10, 20/0, 422 fuera de rango)**: son listados y RN-10 aplica a toda colección aunque la matriz de la consigna no muestre los parámetros en esas rutas. No disparar consultas por fila.
   - `GET /libros/`, `GET /editoriales/{id}/libros` y `GET /generos/{id}/libros` con `joinedload` de editorial/género; `GET /autores/{id}/libros` con join a `LibroAutor` y precarga de `Libro` (rol y orden en la respuesta).
   - `GET /clientes/{id}` con `joinedload(Cliente.perfil)`; el perfil sigue siendo objeto o `null`, nunca lista.
   - Regla: ninguna lectura usa carga perezosa. Opcional como red de seguridad en tests: `lazy="raise"` en las relaciones para que un acceso perezoso falle en vez de esconderse.
@@ -403,8 +405,8 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
   - `README.md` final con nombres y apellidos de los integrantes, requisitos, creación del venv, `pip install -r requirements.txt`, copia de `env.example` a `.env`, arranque con `uvicorn app.main:app --reload`, comando del seed y cómo correr los `.http`.
   - Revisar `env.example`: solo la forma de `DATABASE_URL` y `SQL_ECHO=false`, sin usuario/clave/host reales.
   - Revisar `DEPLOY.md` contra la checklist de C-09: URL, fecha y hora, comandos completos, cambios y actualización.
-  - Armar `Parcial_Cap1a4_<NombreDelGrupo>.zip` con una sola carpeta: código, `requirements.txt`, `env.example`, `test/`, `Dockerfile`, `.dockerignore`, `README.md`, `DEPLOY.md` y `evidencia/`; excluir `.venv`, `__pycache__`, `.env` y archivos temporales.
-  - Decidir si se incluye `.git` (pregunta abierta); si se incluye, revisar el historial y rotar cualquier credencial que haya quedado, aunque se haya borrado después.
+  - Armar `Parcial_Cap1a4_<NombreDelGrupo>.zip` con una sola carpeta y **exactamente** el contenido que pide la consigna: `app/`, el directorio del seed (`app/seed.py` o `scripts/`), `requirements.txt`, `env.example`, `test/`, `Dockerfile`, `.dockerignore`, `README.md`, `DEPLOY.md` y `evidencia/`. Excluir `.venv`, `__pycache__`, `.env`, archivos temporales, `*.zip`, y también `.git/`, `docs/`, `knowledge-base/`, `openspec/`, `.atl/`, `AGENTS.md` y `CLAUDE.md` (decisión 2026-11-09: el formato de entrega enumera el contenido, el historial de `.git` se revisa y no se exponen notas internas).
+  - Generar el `.zip` desde una copia limpia, no desde la raíz con `.git`, y verificar antes de comprimir que no haya `.env` ni credenciales en las carpetas que entran (revisar también archivos sin trackear: `git status` no alcanza).
   - Verificar que no haya credenciales en el repositorio, la imagen ni el zip (RN-G-04); documentar la limitación de `create_all` (DD-06) en README/DEPLOY.
   - Cerrar con el checklist de entrega de `12_devops_y_despliegue.md` y una última corrida de los casos C/D sobre la URL pública.
 - **Dependencias**: C-10

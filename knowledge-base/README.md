@@ -12,7 +12,7 @@ Base de conocimiento generada a partir de `docs/consigna-parcial-cap1a4.md` (tex
 | [01_vision_y_objetivos.md](01_vision_y_objetivos.md) | Propósito, 5 actores, alcance de la entrega, fuera de alcance, métricas |
 | [02_descripcion_general.md](02_descripcion_general.md) | Stack con versiones, arquitectura general, integraciones, resumen de API |
 | [03_actores_y_roles.md](03_actores_y_roles.md) | Actores, ausencia de RBAC, rutas públicas |
-| [04_modelo_de_datos.md](04_modelo_de_datos.md) | 8 tablas con columnas obligatorias, ERD, relaciones y justificación del lado de cada FK, índices, seed |
+| [04_modelo_de_datos.md](04_modelo_de_datos.md) | 9 tablas con columnas obligatorias, ERD, relaciones y justificación del lado de cada FK, índices, seed |
 | [05_reglas_de_negocio.md](05_reglas_de_negocio.md) | RN-01 a RN-12, reglas de integridad (RI-01…05), reglas globales y matriz regla → caso |
 | [06_funcionalidades.md](06_funcionalidades.md) | 5 épicas y 20 historias de usuario con criterios de aceptación |
 | [07_flujos_principales.md](07_flujos_principales.md) | 7 flujos extremo a extremo (arranque, alta de libro, alta de venta, lectura sin N+1, perfil, healthchecks, actualización) |
