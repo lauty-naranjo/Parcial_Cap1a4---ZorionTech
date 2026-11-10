@@ -201,7 +201,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
 > C-03 deja el contrato base y los CRUD de referencia. Los schemas de alta anidados se completan en C-04 y el conteo fijo de consultas se cierra en C-06.
 
 ### [C-03] `contratos-crud`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado
 - **Scope**: DTO separados de las tablas, códigos HTTP correctos, paginación y CRUD de referencia.
   - `schemas.py` en cada módulo con `Create` (sin `id`), `Update` (todos los campos opcionales) y `Read`; los `Read` serializan `Decimal` como string (`"25000.00"`).
   - Helper `app/core/errors.py` con mapa nombre de constraint → mensaje propio + 409; helper de paginación con `limit=Query(20, ge=1, le=100)` y `offset=Query(0, ge=0)`.
@@ -222,6 +222,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
   - `knowledge-base/05_reglas_de_negocio.md` §RN-10, RN-11, RN-12
   - `knowledge-base/07_flujos_principales.md` §Flujo 5 (perfil uno a uno)
   - `knowledge-base/10_preguntas_abiertas.md` §IN-01 (PATCH de autores), §IN-03 (cuerpo de `/health/ready`)
+- **Cierre**: verificado y archivado el 2026-11-10; 158 tests en verde (75 baseline + 83 nuevos); 20 endpoints de CRUD de referencia verificados contra PostgreSQL real; `Decimal` serializado como string; RN-10 en toda colección; IN-01 (PATCH escalar) documentado.
 
 ---
 

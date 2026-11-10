@@ -8,7 +8,12 @@ from sqlmodel import SQLModel
 
 from app.core.config import get_settings
 from app.core.database import build_engine, build_session_factory
+from app.modules.autores.router import router as autores_router
+from app.modules.clientes.router import router as clientes_router
+from app.modules.editoriales.router import router as editoriales_router
+from app.modules.generos.router import router as generos_router
 from app.modules.health.router import router as health_router
+from app.modules.libros.router import router as libros_router
 
 # C-02 completará estos módulos con las nueve tablas del dominio. Los imports
 # deben ejecutarse antes de `SQLModel.metadata.create_all` para que el esquema
@@ -45,6 +50,11 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
     aplicacion.include_router(health_router)
+    aplicacion.include_router(editoriales_router)
+    aplicacion.include_router(generos_router)
+    aplicacion.include_router(autores_router)
+    aplicacion.include_router(clientes_router)
+    aplicacion.include_router(libros_router)
     return aplicacion
 
 

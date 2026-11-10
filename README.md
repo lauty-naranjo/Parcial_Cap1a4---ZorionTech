@@ -1,10 +1,10 @@
 # Librería de barrio — API de catálogo y ventas
 
 API REST asincrónica construida con FastAPI, SQLModel y PostgreSQL. Este
-repositorio corresponde al Capítulo 1–4 de Programación III: por ahora incluye
-el esqueleto de la aplicación, el ciclo de vida del motor de base de datos en el
-`lifespan` y los healthchecks. Las tablas y los endpoints de dominio llegan en
-changes posteriores (C-02 en adelante).
+repositorio corresponde al Capítulo 1–4 de Programación III: incluye el
+esqueleto de la aplicación, el ciclo de vida del motor de base de datos en el
+`lifespan`, los healthchecks, las nueve tablas del dominio y los endpoints de
+CRUD de referencia (editoriales, géneros, autores, clientes y libros).
 
 ## Requisitos
 
@@ -57,6 +57,12 @@ manual.
 | GET | `/health/live` | 200 | `{"estado": "vivo"}` | Proceso vivo; no consulta la base |
 | GET | `/health/ready` | 200 | `{"estado": "listo", "base": "ok"}` | La base responde `SELECT 1` |
 | GET | `/health/ready` | 503 | `{"estado": "no_listo", "base": "error"}` | La base no responde; el detalle queda solo en el log |
+
+## Notas de contrato
+
+- `PATCH /libros/{id}` edita **solo campos escalares** (`isbn`, `titulo`,
+  `precio`, `stock`, `editorial_id`, `genero_id`). Las autorías **no** se editan
+  por `PATCH`: se cargan únicamente en el alta del libro (`POST /libros/`).
 
 ## Pruebas
 
