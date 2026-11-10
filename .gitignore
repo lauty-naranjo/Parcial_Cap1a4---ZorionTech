@@ -12,6 +12,9 @@ __pycache__/
 *.zip
 Parcial_Cap1a4_*.zip
 
+# Artefactos de agentes
+.atl/
+
 # Editores / SO
 .idea/
 .vscode/

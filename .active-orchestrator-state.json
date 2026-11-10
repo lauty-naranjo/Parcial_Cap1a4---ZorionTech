@@ -1,6 +1,6 @@
 {
   "version": 5,
-  "step": "kb",
+  "step": "done",
   "owner": "active-orchestrator",
   "discovery": {
     "skipped": true
@@ -36,10 +36,133 @@
     "created_by": "roadmap-generator",
     "changes_file": "CHANGES.md"
   },
+  "skills": {
+    "created_by": "find-skill",
+    "searched_at": "2026-11-09",
+    "scope": "FastAPI/Python async, SQLModel/SQLAlchemy 2.0 async, PostgreSQL 16, pytest, Docker y hardening de API",
+    "sources": [
+      "npx skills list -g (~/.agents/skills)",
+      "npx skills find <query>",
+      "https://skills.sh"
+    ],
+    "recommended": [
+      {
+        "name": "fastapi",
+        "repo": "fastapi/fastapi",
+        "why": "Skill oficial de FastAPI: inyeccion de dependencias con Annotated[..., Depends(...)], response models, routers con prefix/tags y recomendacion explicita de SQLModel y httpx. Aplica a C-01, C-03 y C-07.",
+        "installed": true,
+        "installed_path": "~/.agents/skills/fastapi"
+      },
+      {
+        "name": "sqlmodel",
+        "repo": "fastapi/sqlmodel",
+        "why": "Guia oficial de SQLModel del mismo repo del framework: modelos table=True con Field, Relationship y sesiones, sin caer en SQLAlchemy declarativo. Cubre C-02 (modelos y relaciones) y C-04 (altas con relaciones). Instalaciones bajas (182) pero es repositorio oficial de 18.6K estrellas.",
+        "installed": true,
+        "installed_path": "~/.agents/skills/sqlmodel"
+      },
+      {
+        "name": "postgresql-optimization",
+        "repo": "github/awesome-copilot",
+        "why": "Indices (compuestos, parciales, de expresion), EXPLAIN ANALYZE y anti-patrones de consultas/paginacion. Complementa postgresql-table-design (ya instalada) para C-06 (lecturas sin N+1 y conteo fijo de consultas) y los indices de FK de C-02.",
+        "installed": true,
+        "installed_path": "~/.agents/skills/postgresql-optimization"
+      },
+      {
+        "name": "api-design-principles",
+        "repo": "wshobson/agents",
+        "why": "Semantica REST, codigos de estado, paginacion/filtros y formato consistente de errores; alinea C-03 y C-10 con knowledge-base/11_contratos_api.md. Ignorar la parte de GraphQL, fuera de alcance.",
+        "installed": false
+      },
+      {
+        "name": "docker-patterns",
+        "repo": "affaan-m/ecc",
+        "why": "Buenas practicas de Dockerfile y ejecucion de contenedores: usuario no root, .dockerignore, healthchecks y variables por --env-file. Aplica a C-08 y C-09. La seccion de Docker Compose no aplica (fuera de alcance).",
+        "installed": false
+      },
+      {
+        "name": "fastapi-expert",
+        "repo": "jeffallan/claude-skills",
+        "why": "Operaciones async con base de datos, Pydantic v2 y patrones de produccion; refuerza C-07 (handlers async sin bloqueos). Solapa con fastapi-templates (ya instalada): opcional.",
+        "installed": false
+      },
+      {
+        "name": "pytest-coverage",
+        "repo": "github/awesome-copilot",
+        "why": "Cobertura con pytest y deteccion de huecos en la suite automatica; complementa python-testing-patterns (ya instalada) para C-10. Opcional.",
+        "installed": false
+      },
+      {
+        "name": "fastapi-templates",
+        "repo": "wshobson/agents",
+        "why": "Scaffolding de proyectos FastAPI con estructura por capas, dependencias y manejo de errores; cubre C-01 y la estructura de app/modules.",
+        "installed": true
+      },
+      {
+        "name": "async-python-patterns",
+        "repo": "wshobson/agents",
+        "why": "asyncio, concurrencia y patrones async/await; base para C-07 (BackgroundTasks, asyncio.sleep y handlers no bloqueantes).",
+        "installed": true
+      },
+      {
+        "name": "python-testing-patterns",
+        "repo": "wshobson/agents",
+        "why": "pytest, fixtures, mocking y pruebas de integracion con httpx; cubre la suite automatica minima de C-10.",
+        "installed": true
+      },
+      {
+        "name": "postgresql-table-design",
+        "repo": "wshobson/agents",
+        "why": "Diseno de esquema PostgreSQL: tipos, PK compuestas, CHECK, FKs e indices; cubre C-02 (nueve tablas y restricciones con nombre).",
+        "installed": true
+      },
+      {
+        "name": "supabase-postgres-best-practices",
+        "repo": "supabase/agent-skills",
+        "why": "Reglas de esquema, migraciones, RLS, indices y diagnostico de consultas lentas; usar solo la parte de modelos/indices, sin RLS ni Supabase (fuera de alcance).",
+        "installed": true
+      },
+      {
+        "name": "security-and-hardening",
+        "repo": "addyosmani/agent-skills",
+        "why": "Validacion de entrada, OWASP Top Ten, manejo de secretos y supply chain; cubre RN-12 (sin trazas ni texto de la base) y la higiene de .env/imagen de C-08 y C-11.",
+        "installed": true
+      }
+    ],
+    "installed": [
+      {
+        "name": "fastapi",
+        "path": "~/.agents/skills/fastapi",
+        "installed_at": "2026-11-09"
+      },
+      {
+        "name": "sqlmodel",
+        "path": "~/.agents/skills/sqlmodel",
+        "installed_at": "2026-11-09"
+      },
+      {
+        "name": "postgresql-optimization",
+        "path": "~/.agents/skills/postgresql-optimization",
+        "installed_at": "2026-11-09"
+      }
+    ]
+  },
+  "registry": {
+    "created_by": "skill-registry",
+    "file": ".atl/skill-registry.md",
+    "skills_indexed": 18
+  },
   "visual_design": {
     "created_by": "design-system",
     "mode": "off",
     "status": "skipped",
     "path": "design-system/README.md"
+  },
+  "agents": {
+    "created_by": "agent-instruction",
+    "files": [
+      "AGENTS.md",
+      "CLAUDE.md"
+    ],
+    "reglas_applied": 13
   }
 }
