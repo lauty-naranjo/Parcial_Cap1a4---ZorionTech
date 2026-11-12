@@ -258,7 +258,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
 > El seed se ejecuta después de C-04 porque necesita las nueve tablas y datos de venta/renglón. Es prerequisito de C-09.
 
 ### [C-05] `datos-iniciales-seed`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado
 - **Scope**: Comando idempotente que deja la base en un estado inicial conocido.
   - `app/seed.py` (o `scripts/seed.py`; elegir uno y usarlo en README y Dockerfile) ejecutable con `python -m app.seed`: crea el motor desde `DATABASE_URL`, ejecuta `create_all` y abre una sesión.
   - Datos compatibles con los ejemplos: editorial id 1, género id 1, al menos cuatro autores (ids 1 a 4; los ids 3 y 4 se usan como coautores), cuatro libros (id 1 "Rayuela" a 25000.00, id 4 "Respiración artificial" a 27000.00, e ids 2 y 3 a elección), dos clientes (id 2 "Tomás Ríos" / tomas@example.com e id 1 a elección) y, opcional, venta id 2 con dos renglones (Rayuela ×2 + Respiración artificial ×1 = 77000.00).
@@ -274,6 +274,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
   - `knowledge-base/09_decisiones_y_supuestos.md` §DD-10, SU-06
   - `knowledge-base/06_funcionalidades.md` §US-041
   - `knowledge-base/10_preguntas_abiertas.md` §Preguntas abiertas (datos del seed)
+- **Cierre**: verificado y archivado el 2026-11-12; 227 tests en verde; `app/seed.py` (`python -m app.seed`) idempotente con ids deterministas, `ON CONFLICT DO NOTHING` por PK y `setval` de secuencias (alta por API post-seed → id 5); datos del seed: 4 libros (Rayuela 25000.00, Respiración artificial 27000.00), 2 clientes (Tomás Ríos id 2), venta id 2 = 77000.00, sin perfil; `SQL_ECHO` forzado a `false`; sin credenciales en salida; README documenta el comando.
 
 ---
 

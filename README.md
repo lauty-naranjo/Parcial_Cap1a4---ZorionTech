@@ -50,6 +50,38 @@ fábrica de sesiones en `app.state` y ejecuta `SQLModel.metadata.create_all`.
 existentes; un cambio de esquema exige recrear la base o aplicar un `ALTER`
 manual.
 
+## Datos iniciales (seed)
+
+Después de configurar la base, cargá el conjunto inicial de datos con:
+
+```powershell
+.venv\Scripts\python.exe -m app.seed
+```
+
+En Linux o dentro del contenedor:
+
+```bash
+python -m app.seed
+docker exec libreria python -m app.seed
+```
+
+- Usa `DATABASE_URL` del entorno o del archivo `.env` del proyecto (sección
+  Configuración). Si falta, el comando termina con código 2 y un mensaje que
+  nombra la variable.
+- Es **idempotente**: se puede ejecutar las veces que haga falta sobre una base
+  vacía o ya sembrada. No duplica filas, no borra y no sobrescribe cambios
+  hechos por la API.
+- Crea las tablas faltantes y deja editorial y género id 1, cuatro autores,
+  cuatro libros (incluidos «Rayuela» a 25000.00 y «Respiración artificial» a
+  27000.00), dos clientes y la venta id 2 con total 77000.00.
+- Ajusta las secuencias para que las altas posteriores por la API no choquen
+  con los ids sembrados.
+- No imprime la URL de conexión ni credenciales: solo informa los conteos por
+  tabla.
+- Si otra fila ya usa un valor único reservado por el seed (por ejemplo, el
+  nombre de la editorial), el comando aborta con código 1 sin dejar cambios a
+  medias.
+
 ## Endpoints de salud
 
 | Método | Ruta | Código | Cuerpo | Descripción |
