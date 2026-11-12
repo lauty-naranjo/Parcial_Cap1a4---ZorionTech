@@ -164,8 +164,11 @@ docker run --rm --entrypoint python libreria-local -c "import fastapi, sqlmodel,
 
 ## Checklist final
 
-- [ ] `pytest -q` → **422 passed + 3 skipped**, 0 failed.
-- [ ] `PATCH {"titulo": null}` → 422; `{"genero_id": null}` → 200.
-- [ ] `requirements.txt` con las cinco versiones exactas.
-- [ ] `git status` sin `.env` ni archivos temporales.
-- [ ] Commits con tu nombre y `git push origin main`.
+- [x] `pytest -q` → **422 passed + 3 skipped**, 0 failed.
+- [x] `PATCH {"titulo": null}` → 422; `{"genero_id": null}` → 200.
+- [x] `requirements.txt` con las cinco versiones exactas.
+- [x] `git status` sin `.env` ni archivos temporales.
+- [x] Commits con tu nombre y `git push origin main`.
+
+> **Estado: completado por Martin Escudero el 2026-11-12.**
+> Commits `b93eea1`…`310868e` en `main`.

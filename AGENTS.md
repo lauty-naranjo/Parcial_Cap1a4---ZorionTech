@@ -1,16 +1,5 @@
 # ZorionTech — Instrucciones para Agentes
 
-> ## ⚠️ TAREA PENDIENTE ASIGNADA A MARTIN ESCUDERO
->
-> **Antes de cualquier otra cosa, leé [`TAREAS-MARTIN.md`](TAREAS-MARTIN.md).**
-> Ahí están las dos tareas que quedaron pendientes a propósito para que las
-> implemente Martin con TDD y las suba con sus propios commits:
-> 1. `PATCH` con `null` explícito debe devolver **422** (hoy devuelve 409).
-> 2. Pinear `requirements.txt` a las versiones verificadas.
->
-> Si el usuario no es Martin ni pidió trabajar en esas tareas, ignorá este aviso
-> y seguí con las instrucciones de abajo.
-
 > Este archivo (y su copia `CLAUDE.md`) es lo PRIMERO que todo agente lee al entrar al repo.
 > Generado a partir de `knowledge-base/` y `CHANGES.md`. No editar a mano sin re-sincronizar ambos archivos.
 
