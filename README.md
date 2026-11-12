@@ -82,6 +82,17 @@ docker exec libreria python -m app.seed
   nombre de la editorial), el comando aborta con código 1 sin dejar cambios a
   medias.
 
+## Docker
+
+La imagen se construye a partir de `python:3.12-alpine`, corre con el usuario
+`appuser` (no root) y trae su propio healthcheck sobre `/health/ready`. La
+configuración entra por `--env-file` (un archivo local con `DATABASE_URL` y
+`SQL_ECHO`, nunca versionado) y los datos iniciales se cargan dentro del
+contenedor con `docker exec libreria python -m app.seed`.
+
+Los comandos completos de build, ejecución, verificación y actualización están
+en [DEPLOY.md](DEPLOY.md).
+
 ## Endpoints de salud
 
 | Método | Ruta | Código | Cuerpo | Descripción |

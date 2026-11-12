@@ -1,0 +1,12 @@
+ESTADO: PENDIENTE (C-09 — despliegue en el VPS)
+CASO: D-04 — reinicio del contenedor con los datos intactos
+COMANDOS (en el VPS, sin imprimir el contenido del archivo de variables):
+  docker rm -f libreria
+  docker run -d --name libreria -p <puerto>:8000 --restart unless-stopped --env-file <archivo> libreria
+  docker ps
+  curl -s http://<host>:<puerto>/libros/
+CRITERIO DE ACEPTACIÓN:
+  El contenedor vuelve a quedar healthy y los datos de la base siguen ahí
+  (create_all solo crea tablas faltantes; la base vive fuera del contenedor).
+SALIDA REAL:
+  (se completa en C-09 al ejecutar contra la URL pública)

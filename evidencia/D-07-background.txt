@@ -1,0 +1,53 @@
+ESTADO: VERIFICADO (2026-11-12) — Docker 29.7.2, motor Linux
+CASO: D-07 — el aviso del comprobante aparece en los logs después de la respuesta
+CONTEXTO:
+  Contenedor `libreria` corriendo con --env-file y con el seed aplicado.
+COMANDOS:
+  POST http://127.0.0.1:8000/ventas/ (desde el host)
+    {"cliente_id": 2, "renglones": [{"libro_id": 1, "cantidad": 2}, {"libro_id": 4, "cantidad": 1}]}
+  docker logs --since 1m libreria
+CRITERIO DE ACEPTACIÓN:
+  La venta responde 201 con total "77000.00" y el log muestra, después de la
+  respuesta, el aviso del comprobante con el id de venta, el email y el total.
+
+=== RESPUESTA REAL DEL POST (HTTP 201) ===
+HTTP 201
+{
+  "id": 3,
+  "fecha": "2026-11-12T15:37:28.785016Z",
+  "total": "77000.00",
+  "cliente": {
+    "id": 2,
+    "nombre": "Tomás Ríos",
+    "email": "tomas@example.com"
+  },
+  "renglones": [
+    {
+      "libro_id": 1,
+      "titulo": "Rayuela",
+      "cantidad": 2,
+      "precio_unitario": "25000.00",
+      "subtotal": "50000.00"
+    },
+    {
+      "libro_id": 4,
+      "titulo": "Respiración artificial",
+      "cantidad": 1,
+      "precio_unitario": "27000.00",
+      "subtotal": "27000.00"
+    }
+  ]
+}
+
+=== docker logs --since 1m libreria ===
+INFO:     127.0.0.1:37212 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     172.18.0.1:60664 - "GET /health HTTP/1.1" 404 Not Found
+INFO:     172.18.0.1:46872 - "GET /libros/ HTTP/1.1" 200 OK
+INFO:     172.18.0.1:55164 - "POST /ventas/ HTTP/1.1" 201 Created
+2026-11-12 15:37:29,415 INFO app.modules.ventas.tasks Aviso de comprobante enviado: venta=3 email=tomas@example.com total=77000.00
+INFO:     127.0.0.1:50990 - "GET /health/ready HTTP/1.1" 200 OK
+
+CONCLUSIÓN:
+  El logger escribe en stdout (visible con `docker logs`), el 201 sale antes del
+  aviso (BackgroundTasks + asyncio.sleep) y el total copiado es "77000.00".
+  No se imprimen credenciales ni la URL de la base.

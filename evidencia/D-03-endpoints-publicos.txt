@@ -1,0 +1,14 @@
+ESTADO: PENDIENTE (C-09 — despliegue en el VPS)
+CASO: D-03 — endpoints públicos desde fuera del contenedor
+COMANDOS (en el VPS, reemplazar <puerto> y <host> por los datos reales):
+  curl -s -i http://<host>:<puerto>/health/ready
+  curl -s -i http://<host>:<puerto>/libros/
+  curl -s -i -X POST http://<host>:<puerto>/ventas/ \
+    -H "Content-Type: application/json" \
+    -d '{"cliente_id": 2, "renglones": [{"libro_id": 1, "cantidad": 2}, {"libro_id": 4, "cantidad": 1}]}'
+CRITERIO DE ACEPTACIÓN:
+  /health/ready → 200 {"estado":"listo","base":"ok"}
+  /libros/ → 200 con los cuatro libros del seed
+  POST /ventas/ → 201 con precios copiados y total "77000.00"
+SALIDA REAL:
+  (se completa en C-09 al ejecutar contra la URL pública)

@@ -1,0 +1,13 @@
+ESTADO: VERIFICADO (2026-11-12) — Docker 29.7.2, motor Linux
+CASO: D-06 — el proceso corre con un usuario sin privilegios
+COMANDO:
+  docker exec libreria id
+CRITERIO DE ACEPTACIÓN:
+  La salida muestra un usuario cuyo uid es 1000 y no es root.
+
+=== SALIDA REAL ===
+uid=1000(appuser) gid=1000(appuser) groups=1000(appuser)
+
+CONCLUSIÓN:
+  El proceso corre como appuser (uid 1000), no root. La imagen lo crea con
+  `adduser -D -H -u 1000 appuser` y lo activa con `USER appuser`.

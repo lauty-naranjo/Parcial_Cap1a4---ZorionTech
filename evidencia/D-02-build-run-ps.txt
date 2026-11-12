@@ -1,0 +1,130 @@
+ESTADO: VERIFICADO (2026-11-12) — Docker 29.7.2, motor Linux
+CASO: D-02 — build, run, docker ps y docker logs
+CONTEXTO DE VERIFICACIÓN:
+  PostgreSQL 16 efímero en Docker (postgres:16-alpine) en la red `libreria-verif`,
+  no la base del host. El archivo de variables `.env.docker` (local, no
+  versionado) apunta a ese contenedor y nunca se imprime.
+COMANDOS:
+  docker build -t libreria .
+  docker run -d --name libreria --network libreria-verif --env-file .env.docker -p 8000:8000 libreria
+  docker ps --filter "name=^/libreria$"
+  docker logs libreria
+  docker exec libreria wget -qO- http://127.0.0.1:8000/health/ready
+  docker exec libreria python -m app.seed
+  GET http://127.0.0.1:8000/libros/ desde el host
+CRITERIO DE ACEPTACIÓN:
+  El build termina con código 0, `docker ps` muestra `healthy` y los logs
+  muestran el arranque; las tablas quedan creadas y el seed y la lectura
+  funcionan.
+
+=== docker build -t libreria . (primer build, extracto real de la capa pip) ===
+#9 [4/6] RUN pip install --no-cache-dir -r requirements.txt
+#9 216.0 [notice] A new release of pip is available: 25.0.1 -> 26.3
+#9 216.0 [notice] To update, run: pip install --upgrade pip
+#9 DONE 217.4s
+#10 [5/6] COPY app ./app
+#10 DONE 0.7s
+#11 [6/6] RUN adduser -D -H -u 1000 appuser
+#11 DONE 0.2s
+#12 exporting to image
+#12 naming to docker.io/library/libreria:latest
+#12 DONE 15.7s
+Código de salida: 0
+
+=== docker build -t libreria . (re-ejecución con caché) ===
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 597B done
+#1 DONE 0.2s
+
+#2 [internal] load metadata for docker.io/library/python:3.12-alpine
+#2 DONE 0.4s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 144B done
+#3 DONE 0.3s
+
+#4 [internal] load build context
+#4 DONE 0.0s
+
+#5 [1/6] FROM docker.io/library/python:3.12-alpine@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89
+#5 resolve docker.io/library/python:3.12-alpine@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89
+#5 resolve docker.io/library/python:3.12-alpine@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89 0.4s done
+#5 DONE 0.5s
+
+#4 [internal] load build context
+#4 transferring context: 6.12kB 0.0s done
+#4 DONE 0.2s
+
+#6 [3/6] COPY requirements.txt .
+#6 CACHED
+
+#7 [4/6] RUN pip install --no-cache-dir -r requirements.txt
+#7 CACHED
+
+#8 [5/6] COPY app ./app
+#8 CACHED
+
+#9 [2/6] WORKDIR /app
+#9 CACHED
+
+#10 [6/6] RUN adduser -D -H -u 1000 appuser
+#10 CACHED
+
+#11 exporting to image
+#11 exporting layers done
+#11 exporting manifest sha256:012e983fff842bbd7bf34f71889544a6e1193ee8b113677edd22a0f3d5317f7d 0.0s done
+#11 exporting config sha256:e21a2a8b92b4933e97ca70d47a071ba28e32870319a757dc124b2b5b5383617a
+#11 exporting config sha256:e21a2a8b92b4933e97ca70d47a071ba28e32870319a757dc124b2b5b5383617a 0.0s done
+#11 exporting attestation manifest sha256:c7a71ad430432a0b1fc43dd821ccd3b22f233b7c2ea66c2463834dc54b74b199
+#11 exporting attestation manifest sha256:c7a71ad430432a0b1fc43dd821ccd3b22f233b7c2ea66c2463834dc54b74b199 0.3s done
+#11 exporting manifest list sha256:940c900612a87db70b9feca3cd0758bd2f8ab671f35fe9cb94bf6097d3f51cc8
+#11 exporting manifest list sha256:940c900612a87db70b9feca3cd0758bd2f8ab671f35fe9cb94bf6097d3f51cc8 0.2s done
+#11 naming to docker.io/library/libreria:latest
+#11 naming to docker.io/library/libreria:latest 0.0s done
+#11 unpacking to docker.io/library/libreria:latest 0.1s done
+#11 DONE 1.2s
+Código de salida: 0
+
+=== docker ps --filter "name=^/libreria$" ===
+CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS                    PORTS                                         NAMES
+31d3e3b02ac0   3a22d1d7846c   "uvicorn app.main:ap…"   32 seconds ago   Up 31 seconds (healthy)   0.0.0.0:8000->8000/tcp, [::]:8000->8000/tcp   libreria
+
+=== docker logs libreria ===
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:60420 - "GET /health/ready HTTP/1.1" 200 OK
+
+=== docker exec libreria wget -qO- http://127.0.0.1:8000/health/ready ===
+{"estado":"listo","base":"ok"}
+
+=== docker exec libreria python -m app.seed ===
+Seed aplicado: editorial=1 genero=1 autor=4 libro=4 libro_autor=5 cliente=2 perfil_cliente=0 venta=1 renglon_venta=2
+
+=== GET http://127.0.0.1:8000/libros/ (desde el host) ===
+HTTP 200
+libros devueltos: 4
+ids: 1, 2, 3, 4
+titulos: Rayuela, Antología del cuento latinoamericano, La ciudad y los perros, Respiración artificial
+
+=== docker run --rm --entrypoint ls libreria -a /app ===
+.
+..
+app
+requirements.txt
+
+=== docker run --rm --entrypoint sh libreria -c "ls -d /app/.venv /app/.git /app/test" ===
+ls: /app/.venv: No such file or directory
+ls: /app/.git: No such file or directory
+ls: /app/test: No such file or directory
+
+CONCLUSIÓN:
+  El build termina con código 0 sin compilador (wheels musllinux), el contenedor
+  queda `healthy`, los logs muestran el arranque en 0.0.0.0:8000, y el seed y la
+  lectura de libros confirman que las tablas existen y sirven.
+  La re-ejecución del build con caché re-exportó la misma imagen con un ID nuevo
+  (940c900612a8) y el mismo tamaño; el contenedor verificado arriba se creó a
+  partir del build inicial (3a22d1d7846c).

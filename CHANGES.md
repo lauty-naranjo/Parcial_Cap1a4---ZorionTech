@@ -335,7 +335,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
 > El Dockerfile se puede escribir en paralelo con C-05/C-06, pero el build y la verificación final esperan C-07.
 
 ### [C-08] `imagen-docker`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado
 - **Scope**: Imagen Alpine sin secretos, con usuario no root y healthcheck propio.
   - `Dockerfile` con `FROM python:3.12-alpine`; `WORKDIR /app`; `COPY requirements.txt .`; `RUN pip install --no-cache-dir -r requirements.txt`; `COPY app ./app`; `COPY scripts ./scripts` (o la ruta del seed elegida en C-05); `RUN adduser -D -H -u 1000 appuser`; `USER appuser`; `EXPOSE 8000`.
   - `HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD wget -qO- http://127.0.0.1:8000/health/ready || exit 1`; usar `127.0.0.1`, nunca `localhost` (Alpine resuelve IPv6 y uvicorn escucha IPv4).
@@ -353,6 +353,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
   - `knowledge-base/05_reglas_de_negocio.md` §RN-G-04
   - `knowledge-base/08_arquitectura_propuesta.md` §Decisiones de infraestructura
   - `knowledge-base/09_decisiones_y_supuestos.md` §DD-07, DD-08, DD-09
+- **Cierre**: verificado y archivado el 2026-11-12; 249 tests en verde; Dockerfile Alpine con capas en orden, `appuser` uid 1000, HEALTHCHECK sobre `127.0.0.1:8000/health/ready` y `CMD` en `0.0.0.0:8000`; build real (BUILD_EXIT=0, wheels musllinux), contenedor `healthy`, seed dentro del contenedor y `GET /libros/` con 4 libros; evidencia D-01, D-02, D-05 (exit 3 sin `DATABASE_URL`), D-06 (uid 1000) y D-07 (aviso en logs) capturada con salida real; D-03 y D-04 quedan pendientes de C-09; base `python:3.12-alpine` 74.8 MB (<100 MB); sin secretos en la imagen.
 
 ---
 
