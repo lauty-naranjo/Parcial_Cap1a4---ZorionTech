@@ -410,7 +410,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
 ---
 
 ### [C-11] `readme-entrega`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` cerrado
 - **Scope**: README reproducible, revisión de secretos y armado del `.zip`.
   - `README.md` final con nombres y apellidos de los integrantes, requisitos, creación del venv, `pip install -r requirements.txt`, copia de `env.example` a `.env`, arranque con `uvicorn app.main:app --reload`, comando del seed y cómo correr los `.http`.
   - Revisar `env.example`: solo la forma de `DATABASE_URL` y `SQL_ECHO=false`, sin usuario/clave/host reales.
@@ -427,6 +427,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
   - `knowledge-base/06_funcionalidades.md` §US-041
   - `knowledge-base/01_vision_y_objetivos.md` §Alcance v1.0, §Fuera de alcance
   - `knowledge-base/10_preguntas_abiertas.md` §Preguntas abiertas (¿se incluye `.git`?)
+- **Cierre**: verificado y archivado el 2026-11-12; 405 tests + 3 skipped; `README.md` final con grupo ZorionTech e integrantes Lautaro Naranjo y Martin Escudero, requisitos, venv, `.env`, arranque, seed, `.http` y `pytest`; `env.example` solo con la forma de `DATABASE_URL` y `SQL_ECHO=false`, sin la IP del VPS; `DEPLOY.md` revisado contra la checklist (URL, fecha y hora, comandos con el nombre de `/root/libreria-zoriontech.env` sin su contenido, cambios y actualización, sin anexo de EasyPanel); `Parcial_Cap1a4_ZorionTech.zip` (136.9 KB, 110 entradas) armado desde una copia limpia con una sola raíz `Parcial_Cap1a4_ZorionTech/` y el contenido exacto (sin `.env`, `.env.docker`, `.git`, `.venv`, `__pycache__`, `.pytest_cache`, `openspec`, `docs`, `knowledge-base`, `.atl`, `AGENTS.md` ni `CLAUDE.md`); revisión de secretos sin coincidencias (sin credenciales, claves privadas, tokens ni `libreria*.env`); despliegue en línea: `GET http://46.202.151.202:8000/health/ready` → 200 `{"estado": "listo", "base": "ok"}`; sin cambios en `app/`, tests, `.http` ni `evidencia/`.
 
 ---
 
