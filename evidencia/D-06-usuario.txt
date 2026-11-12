@@ -1,14 +1,31 @@
-ESTADO: VERIFICADO (2026-11-12) — Docker 29.7.2, motor Linux
-ENTORNO: local (no VPS) — Docker 29.7.2
-CASO: D-06 — el proceso corre con un usuario sin privilegios
-COMANDO:
-  docker exec libreria id
-CRITERIO DE ACEPTACIÓN:
-  La salida muestra un usuario cuyo uid es 1000 y no es root.
+================================================================
+D-06 — El proceso corre con un usuario sin privilegios
+================================================================
+ESTADO: VERIFICADO EN EL VPS (2026-11-12) y en local
+CASO: la salida muestra un usuario cuyo uid es 1000 y no es root.
 
-=== SALIDA REAL ===
-uid=1000(appuser) gid=1000(appuser) groups=1000(appuser)
+================================================================
+SALIDA REAL — VPS 46.202.151.202 (Docker 29.7.1)
+================================================================
+COMANDO:
+  docker exec libreria-zoriontech id
+
+SALIDA:
+  uid=1000(appuser) gid=1000(appuser) groups=1000(appuser)
+
+CONCLUSIÓN (VPS):
+  El contenedor desplegado corre como appuser (uid 1000), no root.
+
+================================================================
+SALIDA REAL — local (no VPS), Docker 29.7.2
+================================================================
+COMANDO:
+  docker exec libreria-local id
+
+SALIDA:
+  uid=1000(appuser) gid=1000(appuser) groups=1000(appuser)
 
 CONCLUSIÓN:
-  El proceso corre como appuser (uid 1000), no root. La imagen lo crea con
-  `adduser -D -H -u 1000 appuser` y lo activa con `USER appuser`.
+  La imagen crea el usuario con `adduser -D -H -u 1000 appuser` y lo activa con
+  `USER appuser`; el mismo uid se verifica en el VPS y en local. El contenedor
+  `libreria` que existe en el VPS pertenece a otro grupo y NO se inspecciona.

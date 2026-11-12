@@ -17,9 +17,9 @@ from app.modules.health.router import router as health_router
 from app.modules.libros.router import router as libros_router
 from app.modules.ventas.router import router as ventas_router
 
-# C-02 completará estos módulos con las nueve tablas del dominio. Los imports
+# Las nueve tablas del dominio viven en `app/modules/*/models.py`. Los imports
 # deben ejecutarse antes de `SQLModel.metadata.create_all` para que el esquema
-# se cree completo; hoy solo aportan el docstring de cada archivo (D-05).
+# se cree completo en el `lifespan` (D-05); `health` no define tablas.
 from app.modules.autores import models as _autores_models  # noqa: F401
 from app.modules.clientes import models as _clientes_models  # noqa: F401
 from app.modules.editoriales import models as _editoriales_models  # noqa: F401

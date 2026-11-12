@@ -417,6 +417,15 @@ def test_env_files_del_servidor_no_viven_en_el_repositorio() -> None:
 def test_git_no_trackea_libreria_env_ni_env_docker() -> None:
     if shutil.which("git") is None:
         pytest.skip("git no disponible")
+    comprobacion = subprocess.run(
+        ["git", "rev-parse", "--is-inside-work-tree"],
+        cwd=RAIZ,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    if comprobacion.returncode != 0 or comprobacion.stdout.strip() != "true":
+        pytest.skip("requiere repositorio git; el zip no lo incluye")
     resultado = subprocess.run(
         ["git", "ls-files"],
         cwd=RAIZ,

@@ -1,13 +1,15 @@
 """Genera la evidencia de consultas con ``SQL_ECHO=true`` (C-06, IN-04).
 
 Captura la salida del ``SELECT`` que emite SQLAlchemy al resolver el detalle de
-un libro con 1 y con 3 autores, y de una venta con 1 y con 3 renglones, sobre
-una base PostgreSQL real. Escribe ``evidencia/C-07-consultas-libro.txt`` y
+libros y ventas del **seed real** (``app.seed.sembrar``): libros 1 y 2 con 1 y
+2 autores, listado de 4 libros, venta 2 con 2 renglones y listados asociados.
+Escribe ``evidencia/C-07-consultas-libro.txt`` y
 ``evidencia/C-07-consultas-venta.txt`` con el conteo explícito de cada caso.
 
 Usa una base derivada ``<DATABASE_URL>_evidencia`` para no tocar la base de
-desarrollo ni la de tests. El script queda en el repo como procedimiento
-reproducible; la evidencia generada es el entregable (la completa C-10).
+desarrollo ni la de tests; la dropea antes de sembrar y la elimina al terminar.
+El script queda en el repo como procedimiento reproducible; la evidencia
+generada es el entregable (la completa C-10).
 
 Uso:
     SQL_ECHO=true .venv/Scripts/python.exe scripts/generar_evidencia_c07.py
@@ -20,7 +22,6 @@ import logging
 import os
 import sys
 from datetime import datetime, timezone
-from decimal import Decimal
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -33,11 +34,7 @@ from sqlmodel import SQLModel
 
 from app.core.database import get_session
 from app.main import create_app
-from app.modules.autores.models import Autor
-from app.modules.clientes.models import Cliente
-from app.modules.editoriales.models import Editorial
-from app.modules.libros.models import Libro, LibroAutor
-from app.modules.ventas.models import RenglonVenta, Venta
+from app.seed import sembrar
 
 EVIDENCIA = Path(__file__).resolve().parent.parent / "evidencia"
 LOGGER_ECO = "sqlalchemy.engine.Engine"
@@ -62,15 +59,22 @@ def _compactar(mensaje: str, limite: int = 180) -> str:
     return " ".join(mensaje.split())[:limite]
 
 
-async def _preparar_url_evidencia(url_base: str) -> tuple[str, str]:
-    """Crea (si falta) la base ``<nombre>_evidencia`` y devuelve su URL."""
+def _dsn_admin(url_base: str) -> tuple[str, str]:
+    """Devuelve el DSN de la base ``postgres`` y la URL de evidencia."""
     original = make_url(url_base)
     nombre = f"{original.database}_evidencia"
     admin = original.set(database="postgres")
     admin_dsn = admin.render_as_string(hide_password=False).replace(
         "postgresql+asyncpg://", "postgresql://"
     )
+    url = original.set(database=nombre).render_as_string(hide_password=False)
+    return admin_dsn, url
 
+
+async def _preparar_base_evidencia(url_base: str) -> tuple[str, str]:
+    """Crea (si falta) la base ``<nombre>_evidencia`` y devuelve su URL."""
+    admin_dsn, url = _dsn_admin(url_base)
+    nombre = make_url(url).database
     conexion = await asyncpg.connect(admin_dsn, timeout=5)
     try:
         existe = await conexion.fetchval(
@@ -80,73 +84,18 @@ async def _preparar_url_evidencia(url_base: str) -> tuple[str, str]:
             await conexion.execute(f'CREATE DATABASE "{nombre}"')
     finally:
         await conexion.close()
-
-    url = original.set(database=nombre).render_as_string(hide_password=False)
     return url, nombre
 
 
-async def _sembrar_libro(sesion, n_autores: int, sufijo: str) -> tuple[int, list[int]]:
-    editorial = Editorial(nombre=f"Ed {sufijo}", pais="Argentina")
-    sesion.add(editorial)
-    await sesion.flush()
-    libro = Libro(
-        isbn=f"978-{sufijo}",
-        titulo=f"Libro {sufijo}",
-        precio=Decimal("1000.00"),
-        stock=5,
-        editorial_id=editorial.id,
-    )
-    sesion.add(libro)
-    await sesion.flush()
-    ids_autores = []
-    for i in range(n_autores):
-        autor = Autor(nombre=f"Autor {sufijo}-{i}", nacionalidad="Argentina")
-        sesion.add(autor)
-        await sesion.flush()
-        ids_autores.append(autor.id)
-        sesion.add(
-            LibroAutor(libro_id=libro.id, autor_id=autor.id, rol="autor", orden=i + 1)
-        )
-    await sesion.commit()
-    return libro.id, ids_autores
-
-
-async def _sembrar_venta(sesion, n_renglones: int, sufijo: str) -> tuple[int, int]:
-    editorial = Editorial(nombre=f"Ed {sufijo}", pais="Argentina")
-    cliente = Cliente(nombre=f"Cli {sufijo}", email=f"c-{sufijo}@x.com")
-    sesion.add_all([editorial, cliente])
-    await sesion.flush()
-    libros = []
-    for i in range(n_renglones):
-        libro = Libro(
-            isbn=f"978-{sufijo}-{i}",
-            titulo=f"Libro {sufijo} {i}",
-            precio=Decimal("1000.00"),
-            stock=5,
-            editorial_id=editorial.id,
-        )
-        sesion.add(libro)
-        libros.append(libro)
-    await sesion.flush()
-    venta = Venta(
-        cliente_id=cliente.id, total=Decimal("0.00"), fecha=datetime.now(timezone.utc)
-    )
-    sesion.add(venta)
-    await sesion.flush()
-    total = Decimal("0.00")
-    for libro in libros:
-        sesion.add(
-            RenglonVenta(
-                venta_id=venta.id,
-                libro_id=libro.id,
-                cantidad=1,
-                precio_unitario=libro.precio,
-            )
-        )
-        total += libro.precio
-    venta.total = total
-    await sesion.commit()
-    return venta.id, cliente.id
+async def _eliminar_base_evidencia(url_base: str) -> None:
+    """Borra la base temporal de evidencia para no dejar residuos."""
+    admin_dsn, url = _dsn_admin(url_base)
+    nombre = make_url(url).database
+    conexion = await asyncpg.connect(admin_dsn, timeout=5)
+    try:
+        await conexion.execute(f'DROP DATABASE IF EXISTS "{nombre}" WITH (FORCE)')
+    finally:
+        await conexion.close()
 
 
 async def _capturar(cliente: httpx.AsyncClient, ruta: str) -> tuple[int, list[str]]:
@@ -173,28 +122,26 @@ def _bloque(titulo: str, status: int, declaraciones: list[str]) -> list[str]:
 
 
 def _resumen(
-    par_uno: tuple[str, int],
-    par_tres: tuple[str, int],
+    detalles: list[tuple[str, int]],
     extras: list[tuple[str, int]],
+    nota: str,
 ) -> list[str]:
-    """Resume la comparación 1 vs 3 y los conteos de referencia por listado."""
-    nombre_uno, total_uno = par_uno
-    nombre_tres, total_tres = par_tres
-    lineas = [
-        "RESUMEN",
-        f"- {nombre_uno}: {total_uno} SELECT",
-        f"- {nombre_tres}: {total_tres} SELECT",
-    ]
-    diferencia = abs(total_tres - total_uno)
-    if diferencia == 0:
-        lineas.append(
-            "- Diferencia: 0 SELECT → el conteo no crece con la cardinalidad."
-        )
-    else:
-        lineas.append(
-            f"- Diferencia: {diferencia} SELECT → REVISAR: el conteo crece "
-            "con la cardinalidad."
-        )
+    """Resume los conteos de detalle, la comparación y los listados."""
+    lineas = ["RESUMEN"]
+    for nombre, total in detalles:
+        lineas.append(f"- {nombre}: {total} SELECT")
+    if len(detalles) >= 2:
+        diferencia = abs(detalles[1][1] - detalles[0][1])
+        if diferencia == 0:
+            lineas.append(
+                "- Diferencia: 0 SELECT → el conteo no crece con la cardinalidad."
+            )
+        else:
+            lineas.append(
+                f"- Diferencia: {diferencia} SELECT → REVISAR: el conteo crece "
+                "con la cardinalidad."
+            )
+    lineas.append(nota)
     for nombre, total in extras:
         lineas.append(f"- {nombre}: {total} SELECT (fijo, sin consulta por fila).")
     return lineas
@@ -202,10 +149,12 @@ def _resumen(
 
 def _encabezado(titulo: str, endpoints: str, base: str) -> list[str]:
     return [
-        f"Evidencia C-07 — cantidad fija de consultas (C-06, IN-04)",
+        "Evidencia C-07 — cantidad fija de consultas (C-06, IN-04)",
         f"Endpoint(s): {endpoints}",
         f"SQL_ECHO: true · PostgreSQL (base {base})",
         f"Generado: {datetime.now(timezone.utc).isoformat(timespec='seconds')}",
+        "Seed real: 4 libros, 4 autores, 2 clientes y la venta 2 con 2 renglones "
+        "(ids de app/seed.py).",
         "Criterio: el número de SELECT no crece con la cantidad de "
         "autores/renglones/ventas.",
         "",
@@ -216,12 +165,12 @@ def _encabezado(titulo: str, endpoints: str, base: str) -> list[str]:
 
 async def main() -> None:
     url_base = os.environ["DATABASE_URL"]
-    url_evidencia, nombre_base = await _preparar_url_evidencia(url_base)
+    url_evidencia, nombre_base = await _preparar_base_evidencia(url_base)
 
     motor = create_async_engine(url_evidencia, echo=True)
     async with motor.begin() as conexion:
         await conexion.run_sync(SQLModel.metadata.drop_all)
-        await conexion.run_sync(SQLModel.metadata.create_all)
+    await sembrar(url_evidencia)
 
     fabrica = async_sessionmaker(motor, expire_on_commit=False)
     app = create_app()
@@ -236,105 +185,88 @@ async def main() -> None:
     EVIDENCIA.mkdir(exist_ok=True)
 
     async with httpx.AsyncClient(transport=transporte, base_url="http://t") as cliente:
-        # Libro: 1 y 3 autores.
-        async with fabrica() as sesion:
-            libro_uno, autores_uno = await _sembrar_libro(sesion, 1, "uno")
-            libro_tres, _ = await _sembrar_libro(sesion, 3, "tres")
-
+        # Libro 1: Rayuela (1 autor). Libro 2: Antología (2 autores).
         casos_libro: list[tuple[str, int]] = []
         lineas = _encabezado(
             "Detalle de libro con cardinalidad variable",
             "GET /libros/{id}",
             nombre_base,
         )
-        for nombre, libro_id, n_autores in (
-            ("1 autor", libro_uno, 1),
-            ("3 autores", libro_tres, 3),
+        for nombre, libro_id, etiqueta in (
+            ("Rayuela (libro 1, 1 autor)", 1, "GET /libros/1 — Rayuela, 1 autor"),
+            (
+                "Antología (libro 2, 2 autores)",
+                2,
+                "GET /libros/2 — Antología, 2 autores",
+            ),
         ):
             status, declaraciones = await _capturar(cliente, f"/libros/{libro_id}")
-            lineas.extend(
-                _bloque(f"GET /libros/{libro_id} — {nombre}", status, declaraciones)
-            )
+            lineas.extend(_bloque(etiqueta, status, declaraciones))
             casos_libro.append((nombre, len(declaraciones)))
 
         status, declaraciones = await _capturar(cliente, "/libros/?limit=100")
         lineas.extend(
-            _bloque(
-                "GET /libros/ — 2 libros en la página", status, declaraciones
-            )
+            _bloque("GET /libros/ — 4 libros en la página", status, declaraciones)
         )
         conteo_listado_libros = len(declaraciones)
 
-        status, declaraciones = await _capturar(
-            cliente, f"/autores/{autores_uno[0]}/libros"
-        )
+        status, declaraciones = await _capturar(cliente, "/autores/1/libros")
         lineas.extend(
             _bloque(
-                f"GET /autores/{autores_uno[0]}/libros — 1 libro",
-                status,
-                declaraciones,
+                "GET /autores/1/libros — 1 libro (Rayuela)", status, declaraciones
             )
         )
         conteo_libros_autor = len(declaraciones)
 
         lineas.extend(
             _resumen(
-                casos_libro[0],
-                casos_libro[1],
+                casos_libro,
                 [
-                    ("listado de 2 libros", conteo_listado_libros),
-                    ("libros de un autor", conteo_libros_autor),
+                    ("listado de 4 libros", conteo_listado_libros),
+                    ("libros del autor 1", conteo_libros_autor),
                 ],
+                "El detalle usa 2 SELECT tanto con 1 como con 2 autores: no hay "
+                "una consulta por autor.",
             )
         )
         (EVIDENCIA / "C-07-consultas-libro.txt").write_text(
             "\n".join(lineas) + "\n", encoding="utf-8"
         )
 
-        # Venta: 1 y 3 renglones.
-        async with fabrica() as sesion:
-            venta_uno, cliente_uno = await _sembrar_venta(sesion, 1, "vuno")
-            venta_tres, _ = await _sembrar_venta(sesion, 3, "vtres")
-
+        # Venta 2: dos renglones (libro 1 ×2 y libro 4 ×1).
         casos_venta: list[tuple[str, int]] = []
         lineas = _encabezado(
             "Detalle y listado de ventas con cardinalidad variable",
             "GET /ventas/{id} · GET /ventas/ · GET /clientes/{id}/ventas",
             nombre_base,
         )
-        for nombre, venta_id in (("1 renglón", venta_uno), ("3 renglones", venta_tres)):
-            status, declaraciones = await _capturar(cliente, f"/ventas/{venta_id}")
-            lineas.extend(
-                _bloque(f"GET /ventas/{venta_id} — {nombre}", status, declaraciones)
-            )
-            casos_venta.append((nombre, len(declaraciones)))
+        status, declaraciones = await _capturar(cliente, "/ventas/2")
+        lineas.extend(_bloque("GET /ventas/2 — 2 renglones", status, declaraciones))
+        casos_venta.append(("venta 2 (2 renglones)", len(declaraciones)))
 
         status, declaraciones = await _capturar(cliente, "/ventas/?limit=100")
         lineas.extend(
-            _bloque("GET /ventas/ — 2 ventas en la página", status, declaraciones)
+            _bloque("GET /ventas/ — 1 venta en la página", status, declaraciones)
         )
         conteo_listado_ventas = len(declaraciones)
 
-        status, declaraciones = await _capturar(
-            cliente, f"/clientes/{cliente_uno}/ventas"
-        )
+        status, declaraciones = await _capturar(cliente, "/clientes/2/ventas")
         lineas.extend(
             _bloque(
-                f"GET /clientes/{cliente_uno}/ventas — 1 venta",
-                status,
-                declaraciones,
+                "GET /clientes/2/ventas — 1 venta", status, declaraciones
             )
         )
         conteo_ventas_cliente = len(declaraciones)
 
         lineas.extend(
             _resumen(
-                casos_venta[0],
-                casos_venta[1],
+                casos_venta,
                 [
-                    ("listado de 2 ventas", conteo_listado_ventas),
-                    ("ventas de un cliente", conteo_ventas_cliente),
+                    ("listado de 1 venta", conteo_listado_ventas),
+                    ("ventas del cliente 2", conteo_ventas_cliente),
                 ],
+                "El detalle usa 2 SELECT con 2 renglones: no hay una consulta "
+                "por renglón.",
             )
         )
         (EVIDENCIA / "C-07-consultas-venta.txt").write_text(
@@ -342,6 +274,7 @@ async def main() -> None:
         )
 
     await motor.dispose()
+    await _eliminar_base_evidencia(url_base)
     print("Evidencia generada en", EVIDENCIA)
 
 

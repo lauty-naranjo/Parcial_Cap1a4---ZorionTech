@@ -182,6 +182,7 @@ docker exec libreria-zoriontech python -m app.seed
 ├── pyproject.toml           # configuración de pytest
 ├── Dockerfile
 ├── .dockerignore
+├── .gitignore
 ├── README.md
 └── DEPLOY.md
 ```

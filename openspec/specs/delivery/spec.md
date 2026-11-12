@@ -66,7 +66,7 @@ actualización.
 
 ### Requirement: Paquete de entrega con contenido exacto
 
-El paquete SHALL llamarse `Parcial_Cap1a4_ZorionTech.zip` y SHALL contener una sola carpeta raíz `Parcial_Cap1a4_ZorionTech/` con exactamente `app/` (incluido `app/seed.py`), `requirements.txt`, `requirements-dev.txt`, `pyproject.toml`, `env.example`, `test/`, `Dockerfile`, `.dockerignore`, `README.md`, `DEPLOY.md`, `evidencia/` y `scripts/`.
+El paquete SHALL llamarse `Parcial_Cap1a4_ZorionTech.zip` y SHALL contener una sola carpeta raíz `Parcial_Cap1a4_ZorionTech/` con exactamente `app/` (incluido `app/seed.py`), `requirements.txt`, `requirements-dev.txt`, `pyproject.toml`, `env.example`, `test/`, `Dockerfile`, `.dockerignore`, `.gitignore`, `README.md`, `DEPLOY.md`, `evidencia/` y `scripts/`.
 
 #### Scenario: Contenido incluido
 
@@ -77,6 +77,11 @@ El paquete SHALL llamarse `Parcial_Cap1a4_ZorionTech.zip` y SHALL contener una s
 
 - **WHEN** se buscan `.env`, `.env.docker`, `.git/`, `.venv/`, `__pycache__/`, `.pytest_cache/`, `openspec/`, `docs/`, `knowledge-base/`, `.atl/`, `AGENTS.md` o `CLAUDE.md` dentro del `.zip`
 - **THEN** no aparece ninguno
+
+#### Scenario: Paquete verificable fuera del repositorio
+
+- **WHEN** se descomprime el `.zip` en un directorio sin `.git` y se ejecuta `pytest -q`
+- **THEN** la suite termina con 0 failed, los tests que requieren PostgreSQL, bash o un repositorio git se saltan, y `.gitignore` está presente
 
 ### Requirement: Paquete sin secretos
 

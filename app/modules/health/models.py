@@ -1,5 +1,8 @@
 """Modelos de tabla del módulo health.
 
-C-01 deja este archivo vacío a propósito (D-05): C-02 agrega aquí las
-tablas del dominio. Este docstring es intencionalmente el único contenido.
+El módulo `health` no define tablas: solo expone los endpoints de salud
+(`/health/live` y `/health/ready`). Las nueve tablas del dominio viven en
+`app/modules/*/models.py` (editoriales, géneros, autores, libros, clientes y
+ventas). Este archivo se conserva vacío a propósito para mantener la misma
+estructura de paquete que el resto de los módulos.
 """

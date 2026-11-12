@@ -142,3 +142,33 @@ SALIDA REAL (conteos antes y después de re-ejecutar el seed):
 CONCLUSIÓN:
   La segunda ejecución del seed sobre la misma base no duplicó filas ni falló:
   los conteos son idénticos antes y después.
+
+================================================================
+D-02 EN EL VPS — build, docker ps, logs y tablas creadas
+================================================================
+ESTADO: VERIFICADO EN EL VPS (2026-11-12)
+ENTORNO: 46.202.151.202, Ubuntu 24.04.4, Docker 29.7.1
+BUILD: docker build -t libreria-zoriontech . -> BUILD_EXIT=0, imagen de 264 MB
+COMANDOS:
+  docker ps --filter name=libreria-zoriontech
+  docker logs libreria-zoriontech
+  docker exec libreria-zoriontech-db psql -U libreria -d libreria -c "\dt"
+SALIDA REAL:
+  libreria-zoriontech    | libreria-zoriontech | Up About an hour (healthy) | 0.0.0.0:8000->8000/tcp
+  libreria-zoriontech-db | postgres:16-alpine   | Up 2 hours                 | 5432/tcp
+
+  INFO:     Started server process [1]
+  INFO:     Waiting for application startup.
+  INFO:     Application startup complete.
+  INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+
+  List of relations (9 tablas creadas por create_all al arrancar):
+   autor, cliente, editorial, genero, libro, libro_autor, perfil_cliente,
+   renglon_venta, venta
+
+CONCLUSIÓN:
+  El build en el servidor terminó con BUILD_EXIT=0; el contenedor quedó healthy;
+  los logs muestran el arranque completo y la base tiene las 9 tablas del
+  dominio creadas por el lifespan. El contenedor es `libreria-zoriontech`
+  (el `libreria` del VPS es de otro grupo y no se usa).
+

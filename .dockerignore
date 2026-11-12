@@ -7,6 +7,10 @@ libreria-zoriontech.env
 __pycache__
 *.pyc
 .pytest_cache
+*.zip
+.atl
+.opencode
+design-system
 knowledge-base
 docs
 evidencia
