@@ -309,7 +309,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
 > C-07 espera C-06 para no pisar `ventas/service.py`. No agregar colas, Redis ni hilos.
 
 ### [C-07] `asincronia-sin-bloqueos`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado
 - **Scope**: Handlers asíncronos y aviso de comprobante en segundo plano.
   - Auditar todos los handlers: `async def`; sin `time.sleep`, `requests`, `httpx` síncrono ni acceso síncrono a la base.
   - `avisar_comprobante(venta_id, email, total)` en `ventas/service.py` o `ventas/tasks.py`: `await asyncio.sleep(0.5)` y `logger.info(...)` con id de venta y email; no recibe la sesión de la petición (se cierra al responder) ni hace consultas.
@@ -325,6 +325,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
   - `knowledge-base/05_reglas_de_negocio.md` §RN-G-02
   - `knowledge-base/08_arquitectura_propuesta.md` §Patrones aplicados (BackgroundTasks)
   - `knowledge-base/12_devops_y_despliegue.md` §Evidencia (D-07)
+- **Cierre**: verificado y archivado el 2026-11-12; 215 tests en verde; `POST /ventas/` agenda `avisar_comprobante` con `BackgroundTasks` + `asyncio.sleep(0.5)` después del `commit` (cuerpo 201 en ~38 ms, log ~516 ms después, dos ventas concurrentes en ~537 ms); tarea sin sesión del request ni SQL; logger a stdout idempotente para `docker logs`; auditoría: 26 rutas async y cero llamadas bloqueantes; sin cambios de contrato.
 
 ---
 

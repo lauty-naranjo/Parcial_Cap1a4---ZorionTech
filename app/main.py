@@ -8,6 +8,7 @@ from sqlmodel import SQLModel
 
 from app.core.config import get_settings
 from app.core.database import build_engine, build_session_factory
+from app.core.logging import configurar_logging
 from app.modules.autores.router import router as autores_router
 from app.modules.clientes.router import router as clientes_router
 from app.modules.editoriales.router import router as editoriales_router
@@ -44,6 +45,7 @@ async def lifespan(aplicacion: FastAPI) -> AsyncIterator[None]:
 
 def create_app() -> FastAPI:
     """Arma la aplicación; no abre conexiones hasta que corre el lifespan."""
+    configurar_logging()
     aplicacion = FastAPI(
         title="Librería de barrio",
         description="API de catálogo y ventas (Parcial Cap. 1 a 4).",
