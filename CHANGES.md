@@ -362,7 +362,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
 > C-09 requiere el seed (C-05) y la imagen verificada (C-08). No hay Compose ni base dentro del contenedor.
 
 ### [C-09] `despliegue-vps`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado
 - **Scope**: Puesta en línea en el VPS, carga inicial y documentación de despliegue.
   - Elegir y documentar el camino: build en el VPS o build local + transferencia de la imagen; usar los datos de acceso y la base que provee la cátedra.
   - `docker build -t libreria .` en el servidor; `docker run -d --name libreria -p <puerto>:8000 --restart unless-stopped --env-file <archivo> libreria`; si PostgreSQL corre en el host, agregar `--add-host=host.docker.internal:host-gateway` y usar esa dirección; nunca `localhost` dentro del contenedor.
@@ -380,6 +380,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
   - `knowledge-base/06_funcionalidades.md` §US-041
   - `knowledge-base/10_preguntas_abiertas.md` §Preguntas abiertas (puerto y `DATABASE_URL` del VPS)
   - `knowledge-base/09_decisiones_y_supuestos.md` §DD-06 (`create_all` sobre base existente)
+- **Cierre**: verificado y archivado el 2026-11-12; 299 tests + 3 skipped; desplegado en el VPS 46.202.151.202 (Ubuntu 24.04.4, Docker 29.7.1) con `docker run` standalone en el puerto 8000: contenedor `libreria-zoriontech`, base `libreria-zoriontech-db` (postgres:16-alpine) con volumen propio y red `libreria-zoriontech-net`; build en el servidor (`BUILD_EXIT=0`, 264 MB) y seed dentro del contenedor; URL pública `http://46.202.151.202:8000` con `/health/ready` 200, 4 libros y `POST /ventas/` 201 con total 77000.00; D-03, D-04 y D-07 verificados con salida real; D-01/D-02/D-05/D-06 locales con entorno declarado; el servidor es compartido y el contenedor `libreria` de otro grupo quedó intacto; los scripts exigen nombres propios y rechazan ese contenedor.
 
 ---
 

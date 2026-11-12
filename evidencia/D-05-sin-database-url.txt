@@ -1,4 +1,5 @@
 ESTADO: VERIFICADO (2026-11-12) — Docker 29.7.2, motor Linux
+ENTORNO: local (no VPS) — Docker 29.7.2
 CASO: D-05 — el contenedor no arranca sin DATABASE_URL
 COMANDO:
   docker run --rm --network libreria-verif libreria

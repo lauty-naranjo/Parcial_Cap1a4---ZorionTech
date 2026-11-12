@@ -51,3 +51,25 @@ CONCLUSIÓN:
   El logger escribe en stdout (visible con `docker logs`), el 201 sale antes del
   aviso (BackgroundTasks + asyncio.sleep) y el total copiado es "77000.00".
   No se imprimen credenciales ni la URL de la base.
+
+=== VPS ===
+ESTADO: VERIFICADO (2026-11-12 17:26 UTC)
+ENTORNO: VPS 46.202.151.202 (Ubuntu 24.04.4, Docker 29.7.1), contenedor
+  `libreria-zoriontech` con PostgreSQL 16 en `libreria-zoriontech-db`
+ORDEN APLICADO: D-03 (desde fuera, creó la venta 3) → D-07 (logs) → D-04 (reinicio).
+COMANDOS:
+  # desde fuera del VPS
+  curl -X POST http://46.202.151.202:8000/ventas/ \
+    -H 'Content-Type: application/json' \
+    -d '{"cliente_id":2,"renglones":[{"libro_id":1,"cantidad":2},{"libro_id":4,"cantidad":1}]}'
+  # en el VPS, antes del reinicio
+  docker logs --since 15m libreria-zoriontech | grep "Aviso de comprobante"
+
+SALIDA REAL:
+  2026-11-12 17:26:11,348 INFO app.modules.ventas.tasks Aviso de comprobante enviado: venta=3 email=tomas@example.com total=77000.00
+
+CONCLUSIÓN:
+  El aviso sale por stdout (visible con `docker logs` del contenedor del VPS),
+  después de la respuesta 201, con el id de la venta, el email del cliente y el
+  total 77000.00. No se imprimen credenciales ni la URL de la base.
+

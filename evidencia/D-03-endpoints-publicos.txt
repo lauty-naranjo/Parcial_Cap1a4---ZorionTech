@@ -1,14 +1,50 @@
-ESTADO: PENDIENTE (C-09 — despliegue en el VPS)
-CASO: D-03 — endpoints públicos desde fuera del contenedor
-COMANDOS (en el VPS, reemplazar <puerto> y <host> por los datos reales):
-  curl -s -i http://<host>:<puerto>/health/ready
-  curl -s -i http://<host>:<puerto>/libros/
-  curl -s -i -X POST http://<host>:<puerto>/ventas/ \
-    -H "Content-Type: application/json" \
-    -d '{"cliente_id": 2, "renglones": [{"libro_id": 1, "cantidad": 2}, {"libro_id": 4, "cantidad": 1}]}'
-CRITERIO DE ACEPTACIÓN:
-  /health/ready → 200 {"estado":"listo","base":"ok"}
-  /libros/ → 200 con los cuatro libros del seed
-  POST /ventas/ → 201 con precios copiados y total "77000.00"
-SALIDA REAL:
-  (se completa en C-09 al ejecutar contra la URL pública)
+================================================================
+D-03 — Endpoints públicos desde fuera del VPS
+================================================================
+ESTADO: VERIFICADO (2026-11-12 17:26 UTC)
+Origen de la prueba: máquina del operador (fuera del VPS)
+URL pública: http://46.202.151.202:8000
+Servidor: Ubuntu 24.04.4 LTS · Docker 29.7.1
+Contenedor: libreria-zoriontech (healthy, 0.0.0.0:8000->8000/tcp)
+
+----------------------------------------------------------------
+Comandos ejecutados
+----------------------------------------------------------------
+curl http://46.202.151.202:8000/health/ready
+curl http://46.202.151.202:8000/libros/
+curl -X POST http://46.202.151.202:8000/ventas/ \
+  -H 'Content-Type: application/json' \
+  -d '{"cliente_id":2,"renglones":[{"libro_id":1,"cantidad":2},{"libro_id":4,"cantidad":1}]}'
+
+----------------------------------------------------------------
+SALIDA REAL
+----------------------------------------------------------------
+GET /health/ready
+200
+{"estado":"listo","base":"ok"}
+
+GET /libros/
+200
+cantidad=4
+1  Rayuela                              25000.00
+2  Antología del cuento latinoamericano 22000.00
+3  La ciudad y los perros               24000.00
+4  Respiración artificial               27000.00
+
+POST /ventas/
+201
+id=3
+total=77000.00
+cliente=Tomás Ríos (tomas@example.com)
+renglones:
+  Rayuela                  x2 = 50000.00
+  Respiración artificial   x1 = 27000.00
+
+----------------------------------------------------------------
+Verificación
+----------------------------------------------------------------
+[OK] GET /health/ready responde 200 con la base conectada
+[OK] GET /libros/ devuelve los 4 libros del seed
+[OK] POST /ventas/ responde 201 con los precios copiados del libro
+[OK] total calculado = 77000.00 (25000.00 x 2 + 27000.00 x 1)
+[OK] la prueba se ejecutó desde fuera del servidor (no localhost)

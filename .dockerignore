@@ -1,5 +1,7 @@
 .env
 .env.docker
+libreria.env
+libreria-zoriontech.env
 .venv
 .git
 __pycache__

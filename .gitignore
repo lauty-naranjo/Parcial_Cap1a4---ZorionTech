@@ -1,6 +1,8 @@
 # Entorno y secretos
 .env
 .env.docker
+libreria.env
+libreria-zoriontech.env
 .venv/
 venv/
 __pycache__/

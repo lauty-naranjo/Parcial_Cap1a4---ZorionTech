@@ -1,4 +1,5 @@
 ESTADO: VERIFICADO (2026-11-12) — Docker 29.7.2, motor Linux
+ENTORNO: local (no VPS) — Docker 29.7.2
 CASO: D-06 — el proceso corre con un usuario sin privilegios
 COMANDO:
   docker exec libreria id

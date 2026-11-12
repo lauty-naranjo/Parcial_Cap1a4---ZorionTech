@@ -128,3 +128,17 @@ CONCLUSIÓN:
   La re-ejecución del build con caché re-exportó la misma imagen con un ID nuevo
   (940c900612a8) y el mismo tamaño; el contenedor verificado arriba se creó a
   partir del build inicial (3a22d1d7846c).
+
+================================================================
+Seed repetido en el VPS (idempotencia) — 2026-11-12
+================================================================
+ENTORNO: VPS 46.202.151.202, contenedor libreria-zoriontech, base
+  libreria-zoriontech-db (postgres:16-alpine)
+COMANDO:
+  docker exec libreria-zoriontech python -m app.seed
+SALIDA REAL (conteos antes y después de re-ejecutar el seed):
+  libros=4 clientes=2 ventas=2 renglones=4
+  libros=4 clientes=2 ventas=2 renglones=4
+CONCLUSIÓN:
+  La segunda ejecución del seed sobre la misma base no duplicó filas ni falló:
+  los conteos son idénticos antes y después.

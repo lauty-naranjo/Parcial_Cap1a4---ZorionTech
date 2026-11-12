@@ -62,7 +62,7 @@ En Linux o dentro del contenedor:
 
 ```bash
 python -m app.seed
-docker exec libreria python -m app.seed
+docker exec libreria-local python -m app.seed
 ```
 
 - Usa `DATABASE_URL` del entorno o del archivo `.env` del proyecto (sección
@@ -88,10 +88,24 @@ La imagen se construye a partir de `python:3.12-alpine`, corre con el usuario
 `appuser` (no root) y trae su propio healthcheck sobre `/health/ready`. La
 configuración entra por `--env-file` (un archivo local con `DATABASE_URL` y
 `SQL_ECHO`, nunca versionado) y los datos iniciales se cargan dentro del
-contenedor con `docker exec libreria python -m app.seed`.
+contenedor con `docker exec libreria-zoriontech python -m app.seed` (o
+`libreria-local` si es la prueba local).
 
 Los comandos completos de build, ejecución, verificación y actualización están
 en [DEPLOY.md](DEPLOY.md).
+
+## Despliegue
+
+La API está en línea en **`http://46.202.151.202:8000`** (contenedor
+`libreria-zoriontech`). El procedimiento completo —build en el servidor, archivo
+de variables fuera del repositorio, actualización y evidencia de los casos D—
+está en [DEPLOY.md](DEPLOY.md).
+
+```bash
+docker run -d --name libreria-zoriontech --network libreria-zoriontech-net \
+  -p 8000:8000 --restart unless-stopped \
+  --env-file /root/libreria-zoriontech.env libreria-zoriontech
+```
 
 ## Endpoints de salud
 

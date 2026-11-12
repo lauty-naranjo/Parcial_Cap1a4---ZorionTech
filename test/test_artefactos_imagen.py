@@ -154,10 +154,11 @@ def test_gitignore_excluye_el_archivo_de_entorno_del_contenedor() -> None:
 
 def test_deploy_documenta_build_run_healthcheck_y_seed() -> None:
     texto = _leer(DEPLOY)
-    assert "docker build -t libreria ." in texto
+    assert "docker build -t libreria-local ." in texto
+    assert "docker build -t libreria-zoriontech ." in texto
     assert "docker run" in texto
     assert "--env-file" in texto
-    assert "docker exec libreria python -m app.seed" in texto
+    assert "docker exec libreria-zoriontech python -m app.seed" in texto
     assert "http://127.0.0.1:8000/health/ready" in texto
 
 
