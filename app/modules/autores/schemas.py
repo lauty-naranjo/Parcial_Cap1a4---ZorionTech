@@ -1,7 +1,9 @@
 """DTO de entrada y salida del módulo autores (C-03)."""
 
+from pydantic import model_validator
 from sqlmodel import SQLModel
 
+from app.core.schemas import rechazar_nulos_explicitos
 from app.modules.editoriales.schemas import EditorialRead
 
 
@@ -17,6 +19,11 @@ class AutorUpdate(SQLModel):
 
     nombre: str | None = None
     nacionalidad: str | None = None
+
+    @model_validator(mode="after")
+    def _sin_nulos_explicitos(self) -> "AutorUpdate":
+        rechazar_nulos_explicitos(self, ("nombre", "nacionalidad"))
+        return self
 
 
 class AutorRead(SQLModel):

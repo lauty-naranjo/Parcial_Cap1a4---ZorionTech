@@ -1,7 +1,9 @@
 """DTO de entrada y salida del módulo clientes (C-03)."""
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from sqlmodel import SQLModel
+
+from app.core.schemas import rechazar_nulos_explicitos
 
 # Los DTO de salida de la venta viven en ``ventas/schemas.py`` (C-04); se
 # reexportan acá para no romper C-03 (``GET /clientes/{id}/ventas``).
@@ -24,6 +26,11 @@ class ClienteUpdate(SQLModel):
 
     nombre: str | None = None
     email: str | None = Field(default=None, pattern=PATRON_EMAIL)
+
+    @model_validator(mode="after")
+    def _sin_nulos_explicitos(self) -> "ClienteUpdate":
+        rechazar_nulos_explicitos(self, ("nombre", "email"))
+        return self
 
 
 class PerfilCreate(SQLModel):

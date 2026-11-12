@@ -6,6 +6,7 @@ from typing import Literal
 from pydantic import Field, model_validator
 from sqlmodel import SQLModel
 
+from app.core.schemas import rechazar_nulos_explicitos
 from app.modules.editoriales.schemas import EditorialRead
 from app.modules.generos.schemas import GeneroRead
 
@@ -73,3 +74,11 @@ class LibroUpdate(SQLModel):
     stock: int | None = Field(default=None, ge=0)
     editorial_id: int | None = None
     genero_id: int | None = None
+
+    @model_validator(mode="after")
+    def _sin_nulos_explicitos(self) -> "LibroUpdate":
+        # ``genero_id`` queda afuera: es nullable y ``null`` sigue siendo válido.
+        rechazar_nulos_explicitos(
+            self, ("isbn", "titulo", "precio", "stock", "editorial_id")
+        )
+        return self
