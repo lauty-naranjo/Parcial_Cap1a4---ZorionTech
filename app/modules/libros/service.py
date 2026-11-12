@@ -1,4 +1,8 @@
-"""Lógica de negocio del módulo libros (C-03, lectura y edición escalar)."""
+"""Lógica de negocio del módulo libros (C-03, lectura y edición escalar).
+
+Las lecturas relacionales precargan editorial, género y autorías: ninguna
+accede a una relación sin ``joinedload``/``selectinload`` (RN-G-03, C-06).
+"""
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError

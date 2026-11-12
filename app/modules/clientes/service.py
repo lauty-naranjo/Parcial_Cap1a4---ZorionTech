@@ -1,4 +1,8 @@
-"""Lógica de negocio del módulo clientes (C-03)."""
+"""Lógica de negocio del módulo clientes (C-03).
+
+Las lecturas relacionales precargan perfil, cliente, renglones y libro: ninguna
+accede a una relación sin ``joinedload``/``selectinload`` (RN-G-03, C-06).
+"""
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError

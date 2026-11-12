@@ -1,9 +1,13 @@
-"""Lógica de negocio del módulo autores (C-03)."""
+"""Lógica de negocio del módulo autores (C-03).
+
+Las lecturas relacionales precargan libro y editorial: ninguna accede a una
+relación sin ``joinedload`` (RN-G-03, C-06).
+"""
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import joinedload
 from fastapi import HTTPException
 
 from app.core.errors import traducir_integrity_error
@@ -77,7 +81,7 @@ async def listar_libros(
     resultado = await session.execute(
         select(LibroAutor)
         .where(LibroAutor.autor_id == autor_id)
-        .options(selectinload(LibroAutor.libro).joinedload(Libro.editorial))
+        .options(joinedload(LibroAutor.libro).joinedload(Libro.editorial))
         .order_by(LibroAutor.orden)
         .offset(offset)
         .limit(limit)

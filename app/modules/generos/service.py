@@ -1,4 +1,8 @@
-"""Lógica de negocio del módulo generos (C-03)."""
+"""Lógica de negocio del módulo generos (C-03).
+
+Las lecturas relacionales precargan editorial y género: ninguna accede a una
+relación sin ``joinedload`` (RN-G-03, C-06).
+"""
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError

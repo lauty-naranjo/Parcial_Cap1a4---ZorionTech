@@ -1,0 +1,35 @@
+Evidencia C-07 — cantidad fija de consultas (C-06, IN-04)
+Endpoint(s): GET /ventas/{id} · GET /ventas/ · GET /clientes/{id}/ventas
+SQL_ECHO: true · PostgreSQL (base postgres_evidencia)
+Generado: 2026-11-12T02:44:10+00:00
+Criterio: el número de SELECT no crece con la cantidad de autores/renglones/ventas.
+
+Detalle y listado de ventas con cardinalidad variable
+
+=== GET /ventas/1 — 1 renglón ===
+[SELECT 1] SELECT venta.id, venta.cliente_id, venta.fecha, venta.total, cliente_1.id AS id_1, cliente_1.nombre, cliente_1.email FROM venta LEFT OUTER JOIN cliente AS cliente_1 ON cliente_1.id
+[SELECT 2] SELECT renglon_venta.venta_id, renglon_venta.id, renglon_venta.libro_id, renglon_venta.cantidad, renglon_venta.precio_unitario, libro_1.id, libro_1.isbn, libro_1.titulo, libro_1.pr
+CONTEO: 2 SELECT (status HTTP 200)
+
+=== GET /ventas/2 — 3 renglones ===
+[SELECT 1] SELECT venta.id, venta.cliente_id, venta.fecha, venta.total, cliente_1.id AS id_1, cliente_1.nombre, cliente_1.email FROM venta LEFT OUTER JOIN cliente AS cliente_1 ON cliente_1.id
+[SELECT 2] SELECT renglon_venta.venta_id, renglon_venta.id, renglon_venta.libro_id, renglon_venta.cantidad, renglon_venta.precio_unitario, libro_1.id, libro_1.isbn, libro_1.titulo, libro_1.pr
+CONTEO: 2 SELECT (status HTTP 200)
+
+=== GET /ventas/ — 2 ventas en la página ===
+[SELECT 1] SELECT venta.id, venta.cliente_id, venta.fecha, venta.total, cliente_1.id AS id_1, cliente_1.nombre, cliente_1.email FROM venta LEFT OUTER JOIN cliente AS cliente_1 ON cliente_1.id
+[SELECT 2] SELECT renglon_venta.venta_id, renglon_venta.id, renglon_venta.libro_id, renglon_venta.cantidad, renglon_venta.precio_unitario, libro_1.id, libro_1.isbn, libro_1.titulo, libro_1.pr
+CONTEO: 2 SELECT (status HTTP 200)
+
+=== GET /clientes/1/ventas — 1 venta ===
+[SELECT 1] SELECT cliente.id, cliente.nombre, cliente.email FROM cliente WHERE cliente.id = $1::INTEGER
+[SELECT 2] SELECT venta.id, venta.cliente_id, venta.fecha, venta.total, cliente_1.id AS id_1, cliente_1.nombre, cliente_1.email FROM venta LEFT OUTER JOIN cliente AS cliente_1 ON cliente_1.id
+[SELECT 3] SELECT renglon_venta.venta_id, renglon_venta.id, renglon_venta.libro_id, renglon_venta.cantidad, renglon_venta.precio_unitario, libro_1.id, libro_1.isbn, libro_1.titulo, libro_1.pr
+CONTEO: 3 SELECT (status HTTP 200)
+
+RESUMEN
+- 1 renglón: 2 SELECT
+- 3 renglones: 2 SELECT
+- Diferencia: 0 SELECT → el conteo no crece con la cardinalidad.
+- listado de 2 ventas: 2 SELECT (fijo, sin consulta por fila).
+- ventas de un cliente: 3 SELECT (fijo, sin consulta por fila).

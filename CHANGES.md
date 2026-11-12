@@ -282,7 +282,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
 > C-06 toca los mismos servicios que C-04. No paralelizarlo con C-07: ambos modifican `ventas/service.py` y `ventas/router.py`.
 
 ### [C-06] `lecturas-sin-n-plus-uno`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado
 - **Scope**: Toda lectura relacional con carga anticipada y número fijo de consultas.
   - `libros/service.py`: `GET /libros/{id}` con `joinedload(Libro.editorial)`, `joinedload(Libro.genero)` y `selectinload(Libro.autorias).joinedload(LibroAutor.autor)`; **un número fijo de consultas** (la referencia son 2: una con los `joinedload` y otra con el `selectinload`), independiente de la cantidad de autores.
   - `ventas/service.py`: `GET /ventas/{id}` con `joinedload(Venta.cliente)` y `selectinload(Venta.renglones).joinedload(RenglonVenta.libro)`; **un número fijo de consultas** (referencia: 2), independiente de la cantidad de renglones.
@@ -300,6 +300,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
   - `knowledge-base/05_reglas_de_negocio.md` §RN-G-03
   - `knowledge-base/11_contratos_api.md` §DTO de salida (`LibroDetalleRead`, `VentaRead`)
   - `knowledge-base/10_preguntas_abiertas.md` §IN-04 (cantidad exacta de consultas)
+- **Cierre**: verificado y archivado el 2026-11-11; 201 tests en verde; `GET /ventas/` y `GET /ventas/{id}` agregados reutilizando `VentaRead`; número fijo de consultas verificado con contador (libro detalle 2, venta detalle 2, listados 2-3, sin crecimiento entre 1 y 3 relaciones); evidencia `SQL_ECHO` en `evidencia/C-07-consultas-libro.txt` y `evidencia/C-07-consultas-venta.txt`; refactor de autores `selectinload` → `joinedload`; sin cambios de contrato.
 
 ---
 

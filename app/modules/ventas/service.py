@@ -1,4 +1,4 @@
-"""Lógica de negocio del módulo ventas (C-04): registro de venta con renglones."""
+"""Lógica de negocio del módulo ventas (C-04/C-06): registro y lectura sin N+1."""
 
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -18,6 +18,8 @@ from app.modules.ventas.schemas import (
     VentaCreate,
     VentaRead,
 )
+
+MENSAJE_NO_ENCONTRADO = "No encontrado"
 
 
 def _a_venta_read(venta: Venta) -> VentaRead:
@@ -43,17 +45,44 @@ def _a_venta_read(venta: Venta) -> VentaRead:
     )
 
 
-async def _releer(session: AsyncSession, venta_id: int) -> VentaRead:
-    """Relee una venta con cliente, renglones y libros precargados (RN-G-03)."""
+def _precarga() -> tuple:
+    """Opciones de carga anticipada de la venta (RN-G-03, IN-04).
+
+    ``joinedload`` para la relación a-uno (cliente) y ``selectinload(...).joinedload(...)``
+    para la colección (renglones → libro): dos consultas fijas, independientes de
+    la cantidad de renglones.
+    """
+    return (
+        joinedload(Venta.cliente),
+        selectinload(Venta.renglones).joinedload(RenglonVenta.libro),
+    )
+
+
+async def obtener(session: AsyncSession, venta_id: int) -> VentaRead:
+    """Detalle de una venta con cliente, renglones y libros precargados; 404 si no existe."""
+    resultado = await session.execute(
+        select(Venta).where(Venta.id == venta_id).options(*_precarga())
+    )
+    venta = resultado.scalar_one_or_none()
+    if venta is None:
+        raise HTTPException(status_code=404, detail=MENSAJE_NO_ENCONTRADO)
+    return _a_venta_read(venta)
+
+
+async def listar(session: AsyncSession, offset: int, limit: int) -> list[VentaRead]:
+    """Lista de ventas paginadas con cliente y renglones precargados (RN-10, RN-G-03).
+
+    El ``selectinload`` emite una sola ``WHERE venta_id IN (...)` para los
+    renglones de la página, sin una consulta adicional por fila.
+    """
     resultado = await session.execute(
         select(Venta)
-        .where(Venta.id == venta_id)
-        .options(
-            joinedload(Venta.cliente),
-            selectinload(Venta.renglones).joinedload(RenglonVenta.libro),
-        )
+        .options(*_precarga())
+        .order_by(Venta.id)
+        .offset(offset)
+        .limit(limit)
     )
-    return _a_venta_read(resultado.scalar_one())
+    return [_a_venta_read(v) for v in resultado.scalars().all()]
 
 
 async def crear(session: AsyncSession, datos: VentaCreate) -> VentaRead:
@@ -93,4 +122,4 @@ async def crear(session: AsyncSession, datos: VentaCreate) -> VentaRead:
         await session.rollback()
         raise traducir_integrity_error(exc) from None
 
-    return await _releer(session, venta.id)
+    return await obtener(session, venta.id)

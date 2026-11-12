@@ -121,16 +121,26 @@ def url_bd_test() -> str:
 
 
 @pytest_asyncio.fixture
-async def fabrica_sesion_bd(url_bd_test):
-    """Motor y fábrica sobre la base de test con el esquema limpio por prueba."""
+async def motor_bd(url_bd_test):
+    """Motor asincrónico sobre la base de test con el esquema limpio por prueba.
+
+    Expone el motor (además de la fábrica) para que los tests de conteo de
+    consultas puedan registrar ``before_cursor_execute`` en ``sync_engine``.
+    """
     motor = create_async_engine(url_bd_test)
     async with motor.begin() as conexion:
         await conexion.run_sync(SQLModel.metadata.drop_all)
         await conexion.run_sync(SQLModel.metadata.create_all)
 
-    fabrica = async_sessionmaker(motor, expire_on_commit=False)
-    yield fabrica
+    yield motor
     await motor.dispose()
+
+
+@pytest_asyncio.fixture
+async def fabrica_sesion_bd(motor_bd):
+    """Fábrica de sesiones sobre el motor de test (esquema limpio por prueba)."""
+    fabrica = async_sessionmaker(motor_bd, expire_on_commit=False)
+    yield fabrica
 
 
 @pytest_asyncio.fixture

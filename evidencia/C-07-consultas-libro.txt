@@ -1,0 +1,33 @@
+Evidencia C-07 — cantidad fija de consultas (C-06, IN-04)
+Endpoint(s): GET /libros/{id}
+SQL_ECHO: true · PostgreSQL (base postgres_evidencia)
+Generado: 2026-11-12T02:44:10+00:00
+Criterio: el número de SELECT no crece con la cantidad de autores/renglones/ventas.
+
+Detalle de libro con cardinalidad variable
+
+=== GET /libros/1 — 1 autor ===
+[SELECT 1] SELECT libro.id, libro.isbn, libro.titulo, libro.precio, libro.stock, libro.editorial_id, libro.genero_id, editorial_1.id AS id_1, editorial_1.nombre, editorial_1.pais, genero_1.id
+[SELECT 2] SELECT libro_autor.libro_id, libro_autor.autor_id, libro_autor.rol, libro_autor.orden, autor_1.id, autor_1.nombre, autor_1.nacionalidad FROM libro_autor LEFT OUTER JOIN autor AS au
+CONTEO: 2 SELECT (status HTTP 200)
+
+=== GET /libros/2 — 3 autores ===
+[SELECT 1] SELECT libro.id, libro.isbn, libro.titulo, libro.precio, libro.stock, libro.editorial_id, libro.genero_id, editorial_1.id AS id_1, editorial_1.nombre, editorial_1.pais, genero_1.id
+[SELECT 2] SELECT libro_autor.libro_id, libro_autor.autor_id, libro_autor.rol, libro_autor.orden, autor_1.id, autor_1.nombre, autor_1.nacionalidad FROM libro_autor LEFT OUTER JOIN autor AS au
+CONTEO: 2 SELECT (status HTTP 200)
+
+=== GET /libros/ — 2 libros en la página ===
+[SELECT 1] SELECT libro.id, libro.isbn, libro.titulo, libro.precio, libro.stock, libro.editorial_id, libro.genero_id, editorial_1.id AS id_1, editorial_1.nombre, editorial_1.pais, genero_1.id
+CONTEO: 1 SELECT (status HTTP 200)
+
+=== GET /autores/1/libros — 1 libro ===
+[SELECT 1] SELECT autor.id, autor.nombre, autor.nacionalidad FROM autor WHERE autor.id = $1::INTEGER
+[SELECT 2] SELECT libro_autor.libro_id, libro_autor.autor_id, libro_autor.rol, libro_autor.orden, editorial_1.id, editorial_1.nombre, editorial_1.pais, libro_1.id AS id_1, libro_1.isbn, libro
+CONTEO: 2 SELECT (status HTTP 200)
+
+RESUMEN
+- 1 autor: 2 SELECT
+- 3 autores: 2 SELECT
+- Diferencia: 0 SELECT → el conteo no crece con la cardinalidad.
+- listado de 2 libros: 1 SELECT (fijo, sin consulta por fila).
+- libros de un autor: 2 SELECT (fijo, sin consulta por fila).
