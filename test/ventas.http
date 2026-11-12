@@ -1,0 +1,42 @@
+@base = http://localhost:8000
+@venta = 2
+@cliente = 2
+
+# Librería de barrio — ventas (C-04, C-06, C-07)
+# Requiere: uvicorn app.main:app y python -m app.seed
+# La venta 2 del seed es de Tomás Ríos: Rayuela x2 y Respiración artificial x1,
+# con total 77000.00 (25000.00 x 2 + 27000.00 x 1).
+
+### Listar ventas con paginación
+GET {{base}}/ventas/?limit=20&offset=0
+# Caso: CRUD
+# Esperado: 200 — {"id": 2, "total": "77000.00"}
+
+### Detalle de la venta con cliente y renglones
+GET {{base}}/ventas/{{venta}}
+# Caso: CRUD
+# Esperado: 200 — "cliente": {"id": 2, "nombre": "Tomás Ríos"} | "precio_unitario": "25000.00" | "subtotal": "50000.00" | "total": "77000.00"
+
+### Detalle de una venta inexistente
+GET {{base}}/ventas/999
+# Caso: CRUD
+# Esperado: 404 — {"detail": "No encontrado"}
+
+### Parámetro de ruta no entero: handler no ejecutado (C-01)
+GET {{base}}/ventas/abc
+# Caso: C-01
+# Esperado: 422 — "type": "int_parsing"
+
+### Alta de venta con dos renglones: precios copiados y total (C-06)
+POST {{base}}/ventas/
+Content-Type: application/json
+
+{
+  "cliente_id": 2,
+  "renglones": [
+    {"libro_id": 1, "cantidad": 2},
+    {"libro_id": 4, "cantidad": 1}
+  ]
+}
+# Caso: C-06
+# Esperado: 201 — "precio_unitario": "25000.00" | "precio_unitario": "27000.00" | "subtotal": "50000.00" | "subtotal": "27000.00" | "total": "77000.00"

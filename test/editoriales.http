@@ -1,0 +1,73 @@
+@base = http://localhost:8000
+@editorial = 1
+
+# Librería de barrio — CRUD de editoriales (C-03)
+# Requiere: uvicorn app.main:app y python -m app.seed
+# La editorial 1 del seed es Sudamericana.
+
+### Listar editoriales
+GET {{base}}/editoriales/
+# Caso: CRUD
+# Esperado: 200 — "Sudamericana"
+
+### Crear una editorial
+POST {{base}}/editoriales/
+Content-Type: application/json
+
+{
+  "nombre": "Emecé",
+  "pais": "Argentina"
+}
+# Caso: CRUD
+# Esperado: 201 — {"nombre": "Emecé", "pais": "Argentina"}
+
+### Crear la misma editorial otra vez: nombre repetido
+POST {{base}}/editoriales/
+Content-Type: application/json
+
+{
+  "nombre": "Emecé",
+  "pais": "Argentina"
+}
+# Caso: CRUD
+# Esperado: 409 — {"detail": "El nombre ya está registrado"}
+
+### Detalle de la editorial del seed
+GET {{base}}/editoriales/{{editorial}}
+# Caso: CRUD
+# Esperado: 200 — {"id": 1, "nombre": "Sudamericana"}
+
+### PATCH parcial: solo viaja el país
+PATCH {{base}}/editoriales/{{editorial}}
+Content-Type: application/json
+
+{
+  "pais": "Argentina"
+}
+# Caso: CRUD
+# Esperado: 200 — {"id": 1, "pais": "Argentina"}
+
+### PATCH de una editorial inexistente
+PATCH {{base}}/editoriales/999
+Content-Type: application/json
+
+{
+  "pais": "Argentina"
+}
+# Caso: CRUD
+# Esperado: 404 — {"detail": "No encontrado"}
+
+### Libros de la editorial del seed
+GET {{base}}/editoriales/{{editorial}}/libros
+# Caso: CRUD
+# Esperado: 200 — {"titulo": "Rayuela", "precio": "25000.00"}
+
+### Libros de una editorial inexistente
+GET {{base}}/editoriales/999/libros
+# Caso: CRUD
+# Esperado: 404 — {"detail": "No encontrado"}
+
+### Parámetro de ruta no entero: handler no ejecutado (C-01)
+GET {{base}}/editoriales/abc
+# Caso: C-01
+# Esperado: 422 — "type": "int_parsing"

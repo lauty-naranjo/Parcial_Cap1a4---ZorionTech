@@ -1,0 +1,16 @@
+@base = http://localhost:8000
+
+# Librería de barrio — healthchecks (IN-03, D-02/D-03)
+# Requiere: uvicorn app.main:app y, para /health/ready, una base accesible.
+# HEALTHCHECK del contenedor (D-02): wget -qO- 127.0.0.1:8000/health/ready
+# Se usa 127.0.0.1 y no localhost para no depender de la resolución de nombres.
+
+### Liveness: el proceso responde sin consultar la base
+GET {{base}}/health/live
+# Caso: CRUD
+# Esperado: 200 — {"estado": "vivo"}
+
+### Readiness: la base responde SELECT 1
+GET {{base}}/health/ready
+# Caso: CRUD
+# Esperado: 200 — {"estado": "listo", "base": "ok"}

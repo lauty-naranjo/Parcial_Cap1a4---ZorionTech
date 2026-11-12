@@ -1,0 +1,46 @@
+@base = http://localhost:8000
+@genero = 1
+
+# Librería de barrio — CRUD de géneros (C-03)
+# Requiere: uvicorn app.main:app y python -m app.seed
+# El género 1 del seed es Novela.
+
+### Listar géneros
+GET {{base}}/generos/
+# Caso: CRUD
+# Esperado: 200 — "Novela"
+
+### Crear un género
+POST {{base}}/generos/
+Content-Type: application/json
+
+{
+  "nombre": "Ensayo"
+}
+# Caso: CRUD
+# Esperado: 201 — {"nombre": "Ensayo"}
+
+### Crear el mismo género otra vez: nombre repetido
+POST {{base}}/generos/
+Content-Type: application/json
+
+{
+  "nombre": "Ensayo"
+}
+# Caso: CRUD
+# Esperado: 409 — {"detail": "El nombre ya está registrado"}
+
+### Libros del género del seed
+GET {{base}}/generos/{{genero}}/libros
+# Caso: CRUD
+# Esperado: 200 — {"titulo": "Rayuela", "genero": {"id": 1, "nombre": "Novela"}}
+
+### Libros de un género inexistente
+GET {{base}}/generos/999/libros
+# Caso: CRUD
+# Esperado: 404 — {"detail": "No encontrado"}
+
+### Paginación inválida: limit=0 no ejecuta el handler (RN-10)
+GET {{base}}/generos/{{genero}}/libros?limit=0
+# Caso: CRUD
+# Esperado: 422 — "type": "greater_than_equal"

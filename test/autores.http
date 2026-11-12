@@ -1,0 +1,58 @@
+@base = http://localhost:8000
+@autor = 1
+
+# Librería de barrio — CRUD de autores (C-03)
+# Requiere: uvicorn app.main:app y python -m app.seed
+# La matriz de 11_contratos_api.md no expone GET /autores/: se consulta por id.
+# El autor 1 del seed es Julio Cortázar.
+
+### Detalle del autor del seed (no existe listado de colección)
+GET {{base}}/autores/{{autor}}
+# Caso: CRUD
+# Esperado: 200 — {"id": 1, "nombre": "Julio Cortázar", "nacionalidad": "Argentina"}
+
+### Detalle de otro autor del seed
+GET {{base}}/autores/4
+# Caso: CRUD
+# Esperado: 200 — {"id": 4, "nombre": "Mario Vargas Llosa", "nacionalidad": "Perú"}
+
+### Crear un autor
+POST {{base}}/autores/
+Content-Type: application/json
+
+{
+  "nombre": "Nuevo Autor",
+  "nacionalidad": "Uruguay"
+}
+# Caso: CRUD
+# Esperado: 201 — {"nombre": "Nuevo Autor", "nacionalidad": "Uruguay"}
+
+### PATCH parcial del autor del seed
+PATCH {{base}}/autores/{{autor}}
+Content-Type: application/json
+
+{
+  "nacionalidad": "Argentina"
+}
+# Caso: CRUD
+# Esperado: 200 — {"id": 1, "nacionalidad": "Argentina"}
+
+### PATCH de un autor inexistente
+PATCH {{base}}/autores/999
+Content-Type: application/json
+
+{
+  "nacionalidad": "Argentina"
+}
+# Caso: CRUD
+# Esperado: 404 — {"detail": "No encontrado"}
+
+### Libros del autor con rol y orden de la autoría
+GET {{base}}/autores/{{autor}}/libros?limit=1&offset=0
+# Caso: CRUD
+# Esperado: 200 — {"libro_id": 1, "titulo": "Rayuela", "rol": "autor", "orden": 1}
+
+### Parámetro de ruta no entero: handler no ejecutado (C-01)
+GET {{base}}/autores/abc
+# Caso: C-01
+# Esperado: 422 — "type": "int_parsing"

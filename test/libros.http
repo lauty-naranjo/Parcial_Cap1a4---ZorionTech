@@ -1,0 +1,69 @@
+@base = http://localhost:8000
+@libro = 1
+
+# Librería de barrio — CRUD de libros (C-03, IN-01)
+# Requiere: uvicorn app.main:app y python -m app.seed
+# El libro 1 del seed es Rayuela (25000.00, stock 10, un autor).
+# IN-01: el PATCH acepta solo campos escalares; "autores" no se edita.
+
+### Listar libros con paginación
+GET {{base}}/libros/?limit=2&offset=1
+# Caso: CRUD
+# Esperado: 200 — {"id": 2, "titulo": "Antología del cuento latinoamericano"}
+
+### Listar libros filtrando por título
+GET {{base}}/libros/?titulo=Rayuela
+# Caso: CRUD
+# Esperado: 200 — {"id": 1, "titulo": "Rayuela", "precio": "25000.00"}
+
+### Listar libros filtrando por género
+GET {{base}}/libros/?genero_id=1
+# Caso: CRUD
+# Esperado: 200 — "genero": {"id": 1, "nombre": "Novela"}
+
+### Detalle de un libro con editorial, género y autores
+GET {{base}}/libros/{{libro}}
+# Caso: CRUD
+# Esperado: 200 — {"id": 1, "isbn": "978-950-00-0001-1", "precio": "25000.00", "stock": 10}
+
+### PATCH parcial: cambia el stock e ignora "autores" (IN-01)
+PATCH {{base}}/libros/{{libro}}
+Content-Type: application/json
+
+{
+  "stock": 11,
+  "autores": [{"autor_id": 2, "rol": "autor", "orden": 1}]
+}
+# Caso: CRUD
+# Esperado: 200 — {"id": 1, "stock": 11}
+
+### PATCH de un libro inexistente
+PATCH {{base}}/libros/999
+Content-Type: application/json
+
+{
+  "stock": 1
+}
+# Caso: CRUD
+# Esperado: 404 — {"detail": "No encontrado"}
+
+### Parámetro de ruta no entero: handler no ejecutado (C-01)
+GET {{base}}/libros/abc
+# Caso: C-01
+# Esperado: 422 — "type": "int_parsing"
+
+### Alta completa de un libro con su autoría
+POST {{base}}/libros/
+Content-Type: application/json
+
+{
+  "isbn": "978-950-00-0099-9",
+  "titulo": "Nuevo libro",
+  "precio": "31000.00",
+  "stock": 3,
+  "editorial_id": 1,
+  "genero_id": 1,
+  "autores": [{"autor_id": 1, "rol": "autor", "orden": 1}]
+}
+# Caso: CRUD
+# Esperado: 201 — {"titulo": "Nuevo libro", "precio": "31000.00", "autores": [{"autor_id": 1, "rol": "autor", "orden": 1}]}

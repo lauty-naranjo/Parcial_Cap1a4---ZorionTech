@@ -1,0 +1,64 @@
+@base = http://localhost:8000
+@cliente = 2
+
+# Librería de barrio — CRUD de clientes (C-03)
+# Requiere: uvicorn app.main:app y python -m app.seed
+# La matriz de 11_contratos_api.md no expone GET /clientes/: se consulta por id.
+# El cliente 2 del seed es Tomás Ríos (tomas@example.com) y no tiene perfil.
+
+### Detalle del cliente del seed (no existe listado de colección)
+GET {{base}}/clientes/{{cliente}}
+# Caso: CRUD
+# Esperado: 200 — {"id": 2, "nombre": "Tomás Ríos", "email": "tomas@example.com"}
+
+### Detalle de otro cliente del seed
+GET {{base}}/clientes/1
+# Caso: CRUD
+# Esperado: 200 — {"id": 1, "nombre": "Ana Gómez", "email": "ana@example.com"}
+
+### Detalle con perfil nulo (el seed no crea perfiles)
+GET {{base}}/clientes/{{cliente}}
+# Caso: CRUD
+# Esperado: 200 — "perfil": null
+
+### Crear un cliente
+POST {{base}}/clientes/
+Content-Type: application/json
+
+{
+  "nombre": "Lucía Fernández",
+  "email": "lucia@example.com"
+}
+# Caso: CRUD
+# Esperado: 201 — {"nombre": "Lucía Fernández", "email": "lucia@example.com"}
+
+### Crear un cliente con email repetido (C-02)
+POST {{base}}/clientes/
+Content-Type: application/json
+
+{
+  "nombre": "Otro Tomás",
+  "email": "tomas@example.com"
+}
+# Caso: C-02
+# Esperado: 409 — {"detail": "El email ya está registrado"}
+
+### PATCH parcial del cliente del seed
+PATCH {{base}}/clientes/{{cliente}}
+Content-Type: application/json
+
+{
+  "nombre": "Tomás Ríos"
+}
+# Caso: CRUD
+# Esperado: 200 — {"id": 2, "nombre": "Tomás Ríos"}
+
+### Ventas del cliente con renglones y total decimal
+GET {{base}}/clientes/{{cliente}}/ventas
+# Caso: CRUD
+# Esperado: 200 — {"total": "77000.00"}
+
+### Parámetro de ruta no entero: handler no ejecutado (C-01)
+GET {{base}}/clientes/abc
+# Caso: C-01
+# Esperado: 422 — "type": "int_parsing"

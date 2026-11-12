@@ -389,7 +389,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
 > C-10 y C-11 cierran la entrega. No agregan funcionalidades nuevas.
 
 ### [C-10] `casos-prueba-evidencia`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` cerrado
 - **Scope**: Archivos `.http`, evidencia de los casos C y D y pruebas de regresión.
   - `test/health.http`, `editoriales.http`, `generos.http`, `autores.http`, `libros.http`, `clientes.http`, `ventas.http` y `casos-C.http`; cada request con el resultado esperado y el código de caso (C-01…C-08 / D-xx) en un comentario.
   - Cubrir C-01 (id no entero → 422), C-02 (ISBN/email repetido → 409), C-03 (segundo perfil → 409), C-04 (editorial/autor inexistente → 409), C-05 (cliente/libro inexistente → 409), C-06 (venta con dos renglones → 201 con total 77000.00), C-07 (detalle con cantidad fija de consultas), C-08 (`' OR '1'='1` → 200 lista vacía).
@@ -405,6 +405,7 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
   - `knowledge-base/07_flujos_principales.md` §Flujo 4, §Flujo 6
   - `knowledge-base/05_reglas_de_negocio.md` §Matriz regla → caso de prueba
   - `knowledge-base/06_funcionalidades.md` §US-041
+- **Cierre**: verificado y archivado el 2026-11-12; 405 tests + 3 skipped; 8 archivos `.http` en `test/` (health, editoriales, generos, autores, libros, clientes, ventas, casos-C) con `# Caso:` y `# Esperado:` por bloque; parser `test/http_runner.py` y replay automático que ejecuta cada request contra la app real y falla si la expectativa no coincide (probado por mutación); cubre C-01…C-08 (C-07 documentado como comando con evidencia); regresiones RN-12 por HTTP, C-01 con cero consultas, paginación en 8 colecciones e importes string decimal; smoke público de solo lectura contra http://46.202.151.202:8000 (health 200, libros 200, C-08 200 `[]`); sin cambios en `app/` ni en la evidencia.
 
 ---
 

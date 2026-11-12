@@ -1,0 +1,152 @@
+@base = http://localhost:8000
+
+# Librería de barrio — hoja de ruta de los casos C-01…C-08 (C-10)
+# Requiere: uvicorn app.main:app y python -m app.seed
+# Recorre los casos HTTP en orden. Los archivos por módulo documentan el CRUD.
+# C-07 no es un request: se demuestra con SQL_ECHO y la evidencia ya generada.
+
+### C-01 — parámetro de ruta no entero en libros
+GET {{base}}/libros/abc
+# Caso: C-01
+# Esperado: 422 — "type": "int_parsing"
+
+### C-01 — parámetro de ruta no entero en clientes
+GET {{base}}/clientes/abc
+# Caso: C-01
+# Esperado: 422 — "type": "int_parsing"
+
+### C-01 — parámetro de ruta no entero en ventas
+GET {{base}}/ventas/abc
+# Caso: C-01
+# Esperado: 422 — "type": "int_parsing"
+
+### C-02 — ISBN repetido: mensaje propio de unicidad
+POST {{base}}/libros/
+Content-Type: application/json
+
+{
+  "isbn": "978-950-00-0001-1",
+  "titulo": "Duplicado",
+  "precio": "10000.00",
+  "stock": 1,
+  "editorial_id": 1,
+  "genero_id": 1,
+  "autores": [{"autor_id": 1, "rol": "autor", "orden": 1}]
+}
+# Caso: C-02
+# Esperado: 409 — {"detail": "El ISBN ya está registrado"}
+
+### C-02 — email repetido: mensaje propio de unicidad
+POST {{base}}/clientes/
+Content-Type: application/json
+
+{
+  "nombre": "Otro Tomás",
+  "email": "tomas@example.com"
+}
+# Caso: C-02
+# Esperado: 409 — {"detail": "El email ya está registrado"}
+
+### C-03 — primer perfil del cliente: alta correcta
+POST {{base}}/clientes/1/perfil
+Content-Type: application/json
+
+{
+  "telefono": "555-0101",
+  "direccion": "Calle 1"
+}
+# Caso: C-03
+# Esperado: 201 — {"cliente_id": 1, "telefono": "555-0101"}
+
+### C-03 — segundo perfil del mismo cliente: conflicto de unicidad
+POST {{base}}/clientes/1/perfil
+Content-Type: application/json
+
+{
+  "telefono": "555-0102",
+  "direccion": "Calle 2"
+}
+# Caso: C-03
+# Esperado: 409 — {"detail": "El cliente ya tiene un perfil"}
+
+### C-04 — alta de libro con editorial inexistente
+POST {{base}}/libros/
+Content-Type: application/json
+
+{
+  "isbn": "978-950-00-0100-2",
+  "titulo": "Editorial inexistente",
+  "precio": "10000.00",
+  "stock": 1,
+  "editorial_id": 999,
+  "genero_id": 1,
+  "autores": [{"autor_id": 1, "rol": "autor", "orden": 1}]
+}
+# Caso: C-04
+# Esperado: 409 — {"detail": "La editorial indicada no existe"}
+
+### C-04 — alta de libro con autor inexistente
+POST {{base}}/libros/
+Content-Type: application/json
+
+{
+  "isbn": "978-950-00-0101-9",
+  "titulo": "Autor inexistente",
+  "precio": "10000.00",
+  "stock": 1,
+  "editorial_id": 1,
+  "genero_id": 1,
+  "autores": [{"autor_id": 999, "rol": "autor", "orden": 1}]
+}
+# Caso: C-04
+# Esperado: 409 — {"detail": "El autor indicado no existe"}
+
+### C-05 — venta con cliente inexistente
+POST {{base}}/ventas/
+Content-Type: application/json
+
+{
+  "cliente_id": 999,
+  "renglones": [{"libro_id": 1, "cantidad": 1}]
+}
+# Caso: C-05
+# Esperado: 409 — {"detail": "El cliente indicado no existe"}
+
+### C-05 — venta con libro inexistente
+POST {{base}}/ventas/
+Content-Type: application/json
+
+{
+  "cliente_id": 2,
+  "renglones": [{"libro_id": 999, "cantidad": 1}]
+}
+# Caso: C-05
+# Esperado: 409 — {"detail": "El libro indicado no existe"}
+
+### C-06 — venta con dos renglones: precios copiados y total decimal
+POST {{base}}/ventas/
+Content-Type: application/json
+
+{
+  "cliente_id": 2,
+  "renglones": [
+    {"libro_id": 1, "cantidad": 2},
+    {"libro_id": 4, "cantidad": 1}
+  ]
+}
+# Caso: C-06
+# Esperado: 201 — "precio_unitario": "25000.00" | "precio_unitario": "27000.00" | "subtotal": "50000.00" | "subtotal": "27000.00" | "total": "77000.00"
+
+### C-08 — inyección SQL en el filtro de título: consulta parametrizada
+GET {{base}}/libros/?titulo=%27%20OR%20%271%27%3D%271
+# Caso: C-08
+# Esperado: 200 — []
+
+### Caso C-07 — cantidad fija de consultas (comando, no request)
+# Arrancar con SQL_ECHO=true y pedir GET /libros/{id} y GET /ventas/{id}:
+#   GET /libros/1  (1 autor)     → 2 SELECT
+#   GET /libros/2  (3 autores)   → 2 SELECT
+#   GET /ventas/2  (2 renglones) → 2 SELECT
+# Evidencia: evidencia/C-07-consultas-libro.txt y evidencia/C-07-consultas-venta.txt
+# Caso: C-07
+# Esperado: el conteo no cambia con la cardinalidad (RN-G-03, IN-04)
