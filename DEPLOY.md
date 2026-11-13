@@ -4,7 +4,8 @@ Este documento cubre la **imagen** (construirla, correrla, verificarla y cargar
 datos) y el **despliegue en el VPS de la cátedra** (URL pública, archivo de
 variables del servidor, actualización y evidencia de los casos D).
 
-> **Estado**: desplegado y verificado el **2026-11-12**. El servidor es un VPS
+> **Estado**: desplegado y verificado el **2026-11-12**, reconstruido desde el
+> commit final **`8d3e8b0`** (`main`). El servidor es un VPS
 > compartido (EasyPanel + Docker Swarm + Traefik) con otros proyectos; este
 > despliegue usa nombres propios (`libreria-zoriontech`,
 > `libreria-zoriontech-db`, red `libreria-zoriontech-net`) para no colisionar
@@ -24,6 +25,7 @@ variables del servidor, actualización y evidencia de los casos D).
 |---|---|---|
 | URL pública | `http://46.202.151.202:8000` | verificado desde fuera del VPS |
 | Día y hora del despliegue | `2026-11-12T17:26:00Z` | registrado |
+| Reconstrucción final | `2026-11-12`, desde `main` (`8d3e8b0`) | verificado (`healthy`) |
 | Método | `http`, sin TLS ni dominio propio | definitivo |
 | Contenedor | `libreria-zoriontech`, puerto interno `8000` | verificado (`healthy`) |
 | Base | `libreria-zoriontech-db` (postgres:16-alpine), volumen `libreria-zoriontech-pgdata` | verificado |
@@ -416,12 +418,12 @@ las tablas faltantes y no altera las existentes**: no hay migraciones, no hay
 
 | Caso | Archivo | Estado |
 |---|---|---|
-| D-01 tamaño de la imagen base | `evidencia/D-01-docker-images.txt` | verificado en local 2026-11-12 |
-| D-02 build, run, `docker ps` y `docker logs` | `evidencia/D-02-build-run-ps.txt` | verificado en local 2026-11-12; build en el VPS: `BUILD_EXIT=0` |
+| D-01 tamaño de la imagen base | `evidencia/D-01-docker-images.txt` | **verificado en el VPS 2026-11-12** (74.8 MB) y en local |
+| D-02 build, run, `docker ps` y `docker logs` | `evidencia/D-02-build-run-ps.txt` | **verificado en el VPS 2026-11-12** (`BUILD_EXIT=0`, 9 tablas) y en local |
 | D-03 endpoints públicos desde fuera | `evidencia/D-03-endpoints-publicos.txt` | **verificado en el VPS 2026-11-12** |
-| D-04 reinicio con datos intactos | `evidencia/D-04-restart.txt` | **verificado en el VPS 2026-11-12** |
-| D-05 contenedor sin `DATABASE_URL` | `evidencia/D-05-sin-database-url.txt` | verificado en local 2026-11-12 (exit 3) |
-| D-06 usuario no root | `evidencia/D-06-usuario.txt` | verificado en local 2026-11-12 (`uid=1000`) |
+| D-04 reinicio con datos intactos | `evidencia/D-04-restart.txt` | **verificado en el VPS 2026-11-12** sobre `main` (`8d3e8b0`) |
+| D-05 contenedor sin `DATABASE_URL` | `evidencia/D-05-sin-database-url.txt` | **verificado en el VPS 2026-11-12** (exit 3) y en local |
+| D-06 usuario no root | `evidencia/D-06-usuario.txt` | **verificado en el VPS 2026-11-12** (`uid=1000`) y en local |
 | D-07 aviso del comprobante en logs | `evidencia/D-07-background.txt` | **verificado en local y en el VPS 2026-11-12** |
 
 Procedimiento reproducible en Linux/WSL:

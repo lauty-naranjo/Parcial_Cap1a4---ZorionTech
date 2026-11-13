@@ -450,3 +450,34 @@ Paso │ Agente A (Backend núcleo) │ Agente B (Datos y calidad) │ Agente C 
 **Primer change recomendado**: `C-01` (`proyecto-conexion-lifespan`).
 
 Para arrancar: `/opsx:propose proyecto-conexion-lifespan`.
+
+---
+
+## Estado final de la entrega (2026-11-12)
+
+Los once changes están archivados y cerrados. Después del cierre se incorporaron
+dos mejoras de contrato, implementadas por **Martin Escudero** con TDD y
+verificadas por el grupo:
+
+| Mejora | Antes | Después | Commits |
+|---|---|---|---|
+| `PATCH` con `null` explícito en un campo no nulo | 409 (`IntegrityError`) | **422** (validación del contrato) | `b93eea1`, `63bdf0e`, `1c391d0` |
+| `requirements.txt` | mínimos `>=` | 5 versiones exactas verificadas | `310868e` |
+
+`genero_id: null` sigue siendo válido (**200**) porque la columna es nullable.
+
+### Números de la entrega
+
+| Dato | Valor |
+|---|---|
+| Commit final de `main` | `8d3e8b0` |
+| Suite en el repositorio | **422 passed + 3 skipped** |
+| Suite desde el `.zip` descomprimido | **258 passed, 167 skipped, 0 failed** |
+| Paquete | `Parcial_Cap1a4_ZorionTech.zip`, 115 archivos, una raíz |
+| Evidencia | `C-07-consultas-{libro,venta}.txt` + `D-01…D-07` (D-01/D-02/D-05/D-06 con salida real del VPS) |
+| Despliegue | `http://46.202.151.202:8000`, contenedor `libreria-zoriontech`, imagen construida desde `8d3e8b0` |
+| Specs | 9 capabilities sincronizadas |
+| Integrantes | Lautaro Naranjo y Martin Escudero (grupo ZorionTech) |
+
+Los números de cierre de C-10 y C-11 (`405 tests`, `111 entradas`) son los que
+tenían al archivarse; los de esta tabla son los de la entrega final.
