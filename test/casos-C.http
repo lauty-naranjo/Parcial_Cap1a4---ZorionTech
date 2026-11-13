@@ -145,7 +145,7 @@ GET {{base}}/libros/?titulo=%27%20OR%20%271%27%3D%271
 ### Caso C-07 — cantidad fija de consultas (comando, no request)
 # Arrancar con SQL_ECHO=true y pedir GET /libros/{id} y GET /ventas/{id}:
 #   GET /libros/1  (1 autor)     → 2 SELECT
-#   GET /libros/2  (3 autores)   → 2 SELECT
+#   GET /libros/2  (2 autores)   → 2 SELECT
 #   GET /ventas/2  (2 renglones) → 2 SELECT
 # Evidencia: evidencia/C-07-consultas-libro.txt y evidencia/C-07-consultas-venta.txt
 # Caso: C-07

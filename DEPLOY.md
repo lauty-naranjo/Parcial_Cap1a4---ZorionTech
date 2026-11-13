@@ -4,8 +4,11 @@ Este documento cubre la **imagen** (construirla, correrla, verificarla y cargar
 datos) y el **despliegue en el VPS de la cátedra** (URL pública, archivo de
 variables del servidor, actualización y evidencia de los casos D).
 
-> **Estado**: desplegado y verificado el **2026-11-12**, reconstruido desde el
-> commit final **`8d3e8b0`** (`main`). El servidor es un VPS
+> **Estado**: desplegado y verificado el **2026-11-12**. La imagen del contenedor
+> se construyó desde el commit **`8d3e8b0`**; el código de `app/` y
+> `requirements.txt` no cambió desde entonces (los commits posteriores,
+> `ad25b5e` y `1b6918c`, solo tocan documentación y el árbol del repositorio).
+> El servidor es un VPS
 > compartido (EasyPanel + Docker Swarm + Traefik) con otros proyectos; este
 > despliegue usa nombres propios (`libreria-zoriontech`,
 > `libreria-zoriontech-db`, red `libreria-zoriontech-net`) para no colisionar
@@ -392,8 +395,12 @@ también queda registrado por `scripts/verificar_despliegue.sh`
     otro grupo. Se dejaron intactos: el despliegue usa nombres propios.
   - El puerto **8000** estaba libre y no hay `ufw` activo; se publicó ahí.
   - PostgreSQL **no** está instalado en el host ni activo como servicio: las
-    bases viven en contenedores. Se creó `libreria-zoriontech-db`
-    (`postgres:16-alpine`) con volumen `libreria-zoriontech-pgdata`.
+    bases viven en contenedores. **La cátedra no proveyó una base para este
+    grupo**: no había credenciales ni host asignados, y el `libreria-db` del
+    servidor pertenece a otro grupo. Por eso se creó `libreria-zoriontech-db`
+    (`postgres:16-alpine`) con volumen `libreria-zoriontech-pgdata`, sin tocar
+    las bases ajenas. Si la cátedra asigna una base, solo cambia `DATABASE_URL`
+    en `/root/libreria-zoriontech.env` y se repiten D-03 y D-04.
   - El código se transfirió con `tar` + `scp` (el VPS tiene git, pero la
     transferencia evita depender de credenciales del repositorio).
   - `docker build -t libreria-zoriontech .` en el servidor: `BUILD_EXIT=0`,

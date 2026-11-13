@@ -470,7 +470,7 @@ verificadas por el grupo:
 
 | Dato | Valor |
 |---|---|
-| Commit final de `main` | `8d3e8b0` |
+| Commit de la imagen desplegada | `8d3e8b0` (los commits posteriores solo tocan documentación; `app/` y `requirements.txt` no cambian) |
 | Suite en el repositorio | **422 passed + 3 skipped** |
 | Suite desde el `.zip` descomprimido | **258 passed, 167 skipped, 0 failed** |
 | Paquete | `Parcial_Cap1a4_ZorionTech.zip`, 115 archivos, una raíz |
